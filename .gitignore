@@ -1,0 +1,41 @@
+# --- Kiro Specific ---
+# Exclude MCP configurations as they may contain personal API keys/tokens
+mcp.json
+.vscode/mcp.json
+.cursor/mcp.json
+.kiro/*
+
+# --- VS Code Specific ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Common Build/Dependency Artifacts (Language Dependent) ---
+node_modules/
+dist/
+build/
+__pycache__/
+*.log
+
+test*.*
+.kiro/specs/canadian-mortgage-calculator/design.md
+.kiro/specs/canadian-mortgage-calculator/requirements.md
+.kiro/specs/canadian-mortgage-calculator/tasks.md
+.kiro/steering/product.md
+.kiro/steering/structure.md
+.kiro/steering/tech.md
+.vscode/settings.json

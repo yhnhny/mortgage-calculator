@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canadian Mortgage Calculator</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind CSS Custom Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: '#BF9447',
+                        black: '#000000'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS for styling -->
+    <style>
+        /* Custom slider styling for webkit browsers */
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #BF9447;
+            cursor: pointer;
+            border: 2px solid #000000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        input[type="range"]::-webkit-slider-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+        }
+        
+        /* Custom slider styling for Firefox */
+        input[type="range"]::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #BF9447;
+            cursor: pointer;
+            border: 2px solid #000000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+        }
+        
+        /* Focus styles for accessibility */
+        input[type="range"]:focus {
+            outline: none;
+        }
+        
+        input[type="range"]:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 0 3px rgba(191, 148, 71, 0.3);
+        }
+        
+        input[type="range"]:focus::-moz-range-thumb {
+            box-shadow: 0 0 0 3px rgba(191, 148, 71, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Main Application Container -->
+    <div id="app" class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-black mb-2">Canadian Mortgage Calculator</h1>
+            <p class="text-gray-600">Calculate your mortgage payments with Canadian regulations and CMHC insurance</p>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="max-w-6xl mx-auto">
+            <!-- Comparison Mode Toggle -->
+            <div class="mb-8 text-center">
+                <div class="inline-flex items-center bg-white rounded-lg shadow-lg p-2">
+                    <button 
+                        @click="comparisonMode = false"
+                        class="px-6 py-2 text-sm font-medium rounded-md transition-colors"
+                        :class="!comparisonMode ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
+                    >
+                        Single Scenario
+                    </button>
+                    <button 
+                        @click="comparisonMode = true"
+                        class="px-6 py-2 text-sm font-medium rounded-md transition-colors"
+                        :class="comparisonMode ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
+                    >
+                        Compare Scenarios
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid gap-8" :class="comparisonMode ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 lg:grid-cols-2'">
+                <!-- Scenario 1 Input Controls Section -->
+                <section class="bg-white rounded-lg shadow-lg p-6" :class="comparisonMode ? 'mb-8' : ''">
+                    <h2 class="text-2xl font-semibold text-black mb-6">
+                        {{ comparisonMode ? 'Scenario 1: Mortgage Details' : 'Mortgage Details' }}
+                    </h2>
+                    
+                    <!-- Mortgage Amount Slider -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Home Price</label>
+                            <div class="text-2xl font-bold text-gold mb-4">${{ homePrice.toLocaleString() }}</div>
+                            
+                            <!-- Range Slider -->
+                            <div class="relative">
+                                <input 
+                                    type="range" 
+                                    v-model.number="homePrice"
+                                    :min="mortgageConfig.ranges.homePrice.min"
+                                    :max="mortgageConfig.ranges.homePrice.max"
+                                    :step="mortgageConfig.ranges.homePrice.step"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                    @input="updateHomePrice"
+                                />
+                                
+                                <!-- Range Labels -->
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>${{ mortgageConfig.ranges.homePrice.min.toLocaleString() }}</span>
+                                    <span>${{ mortgageConfig.ranges.homePrice.max.toLocaleString() }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Manual Input -->
+                            <div class="mt-4">
+                                <label class="block text-xs text-gray-600 mb-1">Or enter exact amount:</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                    <input 
+                                        type="number" 
+                                        v-model.number="homePrice"
+                                        :min="mortgageConfig.ranges.homePrice.min"
+                                        :max="mortgageConfig.ranges.homePrice.max"
+                                        :step="mortgageConfig.ranges.homePrice.step"
+                                        class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        placeholder="Enter home price"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Down Payment</label>
+                            
+                            <!-- Current Down Payment Display -->
+                            <div class="text-xl font-semibold mb-4" :class="isDownPaymentValid ? 'text-black' : 'text-red-600'">
+                                ${{ downPayment.toLocaleString() }} ({{ downPaymentPercent.toFixed(2) }}%)
+                            </div>
+                            
+                            <!-- Down Payment Input Controls -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- Dollar Amount Input -->
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Dollar Amount</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                        <input 
+                                            type="number" 
+                                            v-model.number="downPayment"
+                                            :min="0"
+                                            :max="homePrice"
+                                            :step="1000"
+                                            class="w-full pl-8 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            :class="isDownPaymentValid ? 'border-gray-300' : 'border-red-300 bg-red-50'"
+                                            placeholder="Enter amount"
+                                            @input="updateDownPaymentFromDollar"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <!-- Percentage Input -->
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Percentage</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            :value="downPaymentPercent.toFixed(2)"
+                                            :min="0"
+                                            :max="100"
+                                            :step="0.1"
+                                            class="w-full pl-4 pr-8 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            :class="isDownPaymentValid ? 'border-gray-300' : 'border-red-300 bg-red-50'"
+                                            placeholder="Enter %"
+                                            @input="updateDownPaymentFromPercent"
+                                        />
+                                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Percentage Buttons -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Quick Select:</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <button 
+                                        v-for="percent in [5, 10, 15, 20, 25]" 
+                                        :key="percent"
+                                        @click="setDownPaymentPercent(percent)"
+                                        class="px-3 py-1 text-sm border rounded-md transition-colors"
+                                        :class="Math.abs(downPaymentPercent - percent) < 0.1 ? 'bg-gold text-white border-gold' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+                                    >
+                                        {{ percent }}%
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Down Payment Validation Info -->
+                            <div class="text-sm">
+                                <div class="text-gray-600 mb-1">
+                                    Minimum Required: ${{ minimumDownPayment.toLocaleString() }} ({{ minimumDownPaymentPercent.toFixed(2) }}%)
+                                </div>
+                                
+                                <!-- Error Message -->
+                                <div v-if="!isDownPaymentValid" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div class="text-red-700 font-medium">
+                                            {{ downPaymentErrorMessage }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Success Message -->
+                                <div v-else class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div class="text-green-700 font-medium">
+                                            ✓ Down payment meets Canadian requirements
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Interest Rate</label>
+                            
+                            <!-- Current Rate Display -->
+                            <div class="text-xl font-semibold text-black mb-4">{{ displayInterestRate }}%</div>
+                            
+                            <!-- Rate Type Toggle -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Rate Type:</label>
+                                <div class="flex bg-gray-100 rounded-lg p-1">
+                                    <button 
+                                        @click="rateType = 'fixed'"
+                                        class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                                        :class="rateType === 'fixed' ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
+                                    >
+                                        Fixed Rate
+                                    </button>
+                                    <button 
+                                        @click="rateType = 'variable'"
+                                        class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                                        :class="rateType === 'variable' ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
+                                    >
+                                        Variable Rate
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Fixed Rate Input -->
+                            <div v-if="rateType === 'fixed'" class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-1">Fixed Interest Rate</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        v-model.number="interestRate"
+                                        :min="mortgageConfig.ranges.interestRate.min"
+                                        :max="mortgageConfig.ranges.interestRate.max"
+                                        :step="mortgageConfig.ranges.interestRate.step"
+                                        class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        placeholder="Enter rate"
+                                    />
+                                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                </div>
+                                <div class="mt-1 text-xs text-gray-500">
+                                    Enter the fixed interest rate for your mortgage term
+                                </div>
+                            </div>
+                            
+                            <!-- Variable Rate Configuration -->
+                            <div v-if="rateType === 'variable'" class="space-y-4">
+                                <!-- Prime Rate Configuration -->
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Prime Rate</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            v-model.number="primeRate"
+                                            :min="mortgageConfig.ranges.primeRate.min"
+                                            :max="mortgageConfig.ranges.primeRate.max"
+                                            :step="mortgageConfig.ranges.primeRate.step"
+                                            class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            placeholder="Enter prime rate"
+                                        />
+                                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                    </div>
+                                    <div class="mt-1 text-xs text-gray-500">
+                                        Current Bank of Canada prime rate
+                                    </div>
+                                </div>
+                                
+                                <!-- Variable Rate Discount -->
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Variable Rate Discount</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            v-model.number="variableDiscount"
+                                            :min="mortgageConfig.ranges.variableDiscount.min"
+                                            :max="mortgageConfig.ranges.variableDiscount.max"
+                                            :step="mortgageConfig.ranges.variableDiscount.step"
+                                            class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            placeholder="Enter discount"
+                                        />
+                                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                    </div>
+                                    <div class="mt-1 text-xs text-gray-500">
+                                        Discount off prime rate (e.g., Prime - 0.5%)
+                                    </div>
+                                </div>
+                                
+                                <!-- Variable Rate Calculation Display -->
+                                <div class="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                    <div class="text-sm">
+                                        <div class="font-medium text-blue-900 mb-1">Variable Rate Calculation:</div>
+                                        <div class="text-blue-700">
+                                            {{ primeRate.toFixed(2) }}% (Prime) - {{ variableDiscount.toFixed(2) }}% (Discount) = {{ (primeRate - variableDiscount).toFixed(2) }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rate Information -->
+                            <div class="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                                <div class="text-sm">
+                                    <div class="font-medium text-gray-900 mb-1">Effective Rate Used in Calculations:</div>
+                                    <div class="text-gray-700">
+                                        {{ displayInterestRate }}% {{ rateType === 'variable' ? '(Variable)' : '(Fixed)' }}
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        {{ rateType === 'fixed' ? 'Fixed rate remains constant for the term period' : 'Variable rate may change with prime rate adjustments' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Amortization Period</label>
+                            
+                            <!-- Current Amortization Display -->
+                            <div class="text-xl font-semibold text-black mb-4">{{ amortizationYears }} years</div>
+                            
+                            <!-- Amortization Period Button Selector -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Select Period:</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    <button 
+                                        v-for="period in mortgageConfig.amortizationPeriods" 
+                                        :key="period"
+                                        @click="amortizationYears = period"
+                                        class="px-4 py-2 text-sm font-medium border rounded-md transition-colors"
+                                        :class="amortizationYears === period ? 'bg-gold text-white border-gold shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'"
+                                    >
+                                        {{ period }} years
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Custom Amortization Input -->
+                            <div class="mt-4">
+                                <label class="block text-xs text-gray-600 mb-1">Or enter custom period:</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        v-model.number="amortizationYears"
+                                        :min="5"
+                                        :max="30"
+                                        :step="1"
+                                        class="w-full pl-4 pr-16 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        placeholder="Enter years"
+                                    />
+                                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                                </div>
+                                <div class="mt-1 text-xs text-gray-500">
+                                    Maximum 30 years for Canadian mortgages
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Interest Term</label>
+                            
+                            <!-- Current Interest Term Display -->
+                            <div class="text-xl font-semibold text-black mb-4">{{ interestTerm }} {{ interestTerm === 1 ? 'year' : 'years' }}</div>
+                            
+                            <!-- Interest Term Button Selector -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Select Term:</label>
+                                <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                                    <button 
+                                        v-for="term in mortgageConfig.interestTerms" 
+                                        :key="term"
+                                        @click="interestTerm = term"
+                                        class="px-3 py-2 text-sm font-medium border rounded-md transition-colors"
+                                        :class="interestTerm === term ? 'bg-gold text-white border-gold shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'"
+                                    >
+                                        {{ term }} {{ term === 1 ? 'yr' : 'yrs' }}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Custom Interest Term Input -->
+                            <div class="mt-4">
+                                <label class="block text-xs text-gray-600 mb-1">Or enter custom term:</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        v-model.number="interestTerm"
+                                        :min="1"
+                                        :max="amortizationYears"
+                                        :step="1"
+                                        class="w-full pl-4 pr-16 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        placeholder="Enter years"
+                                    />
+                                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                                </div>
+                                <div class="mt-1 text-xs text-gray-500">
+                                    Cannot exceed amortization period ({{ amortizationYears }} years)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Payment Frequency</label>
+                            
+                            <!-- Current Payment Frequency Display -->
+                            <div class="text-xl font-semibold text-black mb-4">{{ mortgageConfig.paymentFrequencies[paymentFrequency].label }}</div>
+                            
+                            <!-- Payment Frequency Selector -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Select Frequency:</label>
+                                <div class="space-y-2">
+                                    <div 
+                                        v-for="(frequency, key) in mortgageConfig.paymentFrequencies" 
+                                        :key="key"
+                                        class="flex items-center"
+                                    >
+                                        <input 
+                                            type="radio" 
+                                            :id="'frequency-' + key"
+                                            :value="key"
+                                            v-model="paymentFrequency"
+                                            class="w-4 h-4 text-gold bg-gray-100 border-gray-300 focus:ring-gold focus:ring-2"
+                                        />
+                                        <label 
+                                            :for="'frequency-' + key" 
+                                            class="ml-2 text-sm font-medium text-gray-900 cursor-pointer"
+                                        >
+                                            {{ frequency.label }}
+                                            <span class="text-gray-500 text-xs ml-1">({{ frequency.value }} payments/year)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Frequency Information -->
+                            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                <div class="text-sm">
+                                    <div class="font-medium text-blue-900 mb-1">Payment Information:</div>
+                                    <div class="text-blue-700">
+                                        <div>Frequency: {{ mortgageConfig.paymentFrequencies[paymentFrequency].label }}</div>
+                                        <div>Payments per year: {{ mortgageConfig.paymentFrequencies[paymentFrequency].value }}</div>
+                                        <div v-if="isCalculationValid">Payment amount: ${{ Math.round(actualPayment).toLocaleString() }}</div>
+                                    </div>
+                                    <div class="text-xs text-blue-600 mt-1">
+                                        <span v-if="paymentFrequency.includes('accelerated')">
+                                            Accelerated payments help pay off your mortgage faster by making extra principal payments.
+                                        </span>
+                                        <span v-else-if="paymentFrequency === 'biWeekly' || paymentFrequency === 'weekly'">
+                                            More frequent payments can reduce total interest paid over the life of the mortgage.
+                                        </span>
+                                        <span v-else>
+                                            Monthly payments are the most common payment frequency for Canadian mortgages.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Scenario 2 Input Controls Section (only shown in comparison mode) -->
+                <section v-if="comparisonMode" class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-semibold text-black mb-6">Scenario 2: Mortgage Details</h2>
+                    
+                    <!-- Mortgage Amount Slider -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Home Price</label>
+                            <div class="text-2xl font-bold text-gold mb-4">${{ scenario2.homePrice.toLocaleString() }}</div>
+                            
+                            <!-- Range Slider -->
+                            <div class="relative">
+                                <input 
+                                    type="range" 
+                                    v-model.number="scenario2.homePrice"
+                                    :min="mortgageConfig.ranges.homePrice.min"
+                                    :max="mortgageConfig.ranges.homePrice.max"
+                                    :step="mortgageConfig.ranges.homePrice.step"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                />
+                                
+                                <!-- Range Labels -->
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>${{ mortgageConfig.ranges.homePrice.min.toLocaleString() }}</span>
+                                    <span>${{ mortgageConfig.ranges.homePrice.max.toLocaleString() }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Manual Input -->
+                            <div class="mt-4">
+                                <label class="block text-xs text-gray-600 mb-1">Or enter exact amount:</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                    <input 
+                                        type="number" 
+                                        v-model.number="scenario2.homePrice"
+                                        :min="mortgageConfig.ranges.homePrice.min"
+                                        :max="mortgageConfig.ranges.homePrice.max"
+                                        :step="mortgageConfig.ranges.homePrice.step"
+                                        class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        placeholder="Enter home price"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Down Payment</label>
+                            
+                            <!-- Current Down Payment Display -->
+                            <div class="text-xl font-semibold mb-4" :class="isDownPaymentValid2 ? 'text-black' : 'text-red-600'">
+                                ${{ scenario2.downPayment.toLocaleString() }} ({{ downPaymentPercent2.toFixed(2) }}%)
+                            </div>
+                            
+                            <!-- Down Payment Input Controls -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- Dollar Amount Input -->
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Dollar Amount</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                        <input 
+                                            type="number" 
+                                            v-model.number="scenario2.downPayment"
+                                            :min="0"
+                                            :max="scenario2.homePrice"
+                                            :step="1000"
+                                            class="w-full pl-8 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            :class="isDownPaymentValid2 ? 'border-gray-300' : 'border-red-300 bg-red-50'"
+                                            placeholder="Enter amount"
+                                            @input="updateDownPaymentFromDollar2"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <!-- Percentage Input -->
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Percentage</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            :value="downPaymentPercent2.toFixed(2)"
+                                            :min="0"
+                                            :max="100"
+                                            :step="0.1"
+                                            class="w-full pl-4 pr-8 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            :class="isDownPaymentValid2 ? 'border-gray-300' : 'border-red-300 bg-red-50'"
+                                            placeholder="Enter %"
+                                            @input="updateDownPaymentFromPercent2"
+                                        />
+                                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Percentage Buttons -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Quick Select:</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <button 
+                                        v-for="percent in [5, 10, 15, 20, 25]" 
+                                        :key="percent"
+                                        @click="setDownPaymentPercent2(percent)"
+                                        class="px-3 py-1 text-sm border rounded-md transition-colors"
+                                        :class="Math.abs(downPaymentPercent2 - percent) < 0.1 ? 'bg-gold text-white border-gold' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+                                    >
+                                        {{ percent }}%
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Down Payment Validation Info -->
+                            <div class="text-sm">
+                                <div class="text-gray-600 mb-1">
+                                    Minimum Required: ${{ minimumDownPayment2.toLocaleString() }} ({{ minimumDownPaymentPercent2.toFixed(2) }}%)
+                                </div>
+                                
+                                <!-- Error Message -->
+                                <div v-if="!isDownPaymentValid2" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div class="text-red-700 font-medium">
+                                            {{ downPaymentErrorMessage2 }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Success Message -->
+                                <div v-else class="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div class="text-green-700 font-medium">
+                                            ✓ Down payment meets Canadian requirements
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Interest Rate</label>
+                            
+                            <!-- Current Rate Display -->
+                            <div class="text-xl font-semibold text-black mb-4">{{ displayInterestRate2 }}%</div>
+                            
+                            <!-- Rate Type Toggle -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Rate Type:</label>
+                                <div class="flex bg-gray-100 rounded-lg p-1">
+                                    <button 
+                                        @click="scenario2.rateType = 'fixed'"
+                                        class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                                        :class="scenario2.rateType === 'fixed' ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
+                                    >
+                                        Fixed Rate
+                                    </button>
+                                    <button 
+                                        @click="scenario2.rateType = 'variable'"
+                                        class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                                        :class="scenario2.rateType === 'variable' ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
+                                    >
+                                        Variable Rate
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Fixed Rate Input -->
+                            <div v-if="scenario2.rateType === 'fixed'" class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-1">Fixed Interest Rate</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        v-model.number="scenario2.interestRate"
+                                        :min="mortgageConfig.ranges.interestRate.min"
+                                        :max="mortgageConfig.ranges.interestRate.max"
+                                        :step="mortgageConfig.ranges.interestRate.step"
+                                        class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        placeholder="Enter rate"
+                                    />
+                                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                </div>
+                                <div class="mt-1 text-xs text-gray-500">
+                                    Enter the fixed interest rate for your mortgage term
+                                </div>
+                            </div>
+                            
+                            <!-- Variable Rate Configuration -->
+                            <div v-if="scenario2.rateType === 'variable'" class="space-y-4">
+                                <!-- Prime Rate Configuration -->
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Prime Rate</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            v-model.number="primeRate"
+                                            :min="mortgageConfig.ranges.primeRate.min"
+                                            :max="mortgageConfig.ranges.primeRate.max"
+                                            :step="mortgageConfig.ranges.primeRate.step"
+                                            class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            placeholder="Enter prime rate"
+                                        />
+                                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                    </div>
+                                    <div class="mt-1 text-xs text-gray-500">
+                                        Current Bank of Canada prime rate (shared between scenarios)
+                                    </div>
+                                </div>
+                                
+                                <!-- Variable Rate Discount -->
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Variable Rate Discount</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            v-model.number="scenario2.variableDiscount"
+                                            :min="mortgageConfig.ranges.variableDiscount.min"
+                                            :max="mortgageConfig.ranges.variableDiscount.max"
+                                            :step="mortgageConfig.ranges.variableDiscount.step"
+                                            class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            placeholder="Enter discount"
+                                        />
+                                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                    </div>
+                                    <div class="mt-1 text-xs text-gray-500">
+                                        Discount off prime rate (e.g., Prime - 0.5%)
+                                    </div>
+                                </div>
+                                
+                                <!-- Variable Rate Calculation Display -->
+                                <div class="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                    <div class="text-sm">
+                                        <div class="font-medium text-blue-900 mb-1">Variable Rate Calculation:</div>
+                                        <div class="text-blue-700">
+                                            {{ primeRate.toFixed(2) }}% (Prime) - {{ scenario2.variableDiscount.toFixed(2) }}% (Discount) = {{ (primeRate - scenario2.variableDiscount).toFixed(2) }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rate Information -->
+                            <div class="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                                <div class="text-sm">
+                                    <div class="font-medium text-gray-900 mb-1">Effective Rate Used in Calculations:</div>
+                                    <div class="text-gray-700">
+                                        {{ displayInterestRate2 }}% {{ scenario2.rateType === 'variable' ? '(Variable)' : '(Fixed)' }}
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        {{ scenario2.rateType === 'fixed' ? 'Fixed rate remains constant for the term period' : 'Variable rate may change with prime rate adjustments' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Amortization Period</label>
+                            
+                            <!-- Current Amortization Display -->
+                            <div class="text-xl font-semibold text-black mb-4">{{ scenario2.amortizationYears }} years</div>
+                            
+                            <!-- Amortization Period Button Selector -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Select Period:</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    <button 
+                                        v-for="period in mortgageConfig.amortizationPeriods" 
+                                        :key="period"
+                                        @click="scenario2.amortizationYears = period"
+                                        class="px-4 py-2 text-sm font-medium border rounded-md transition-colors"
+                                        :class="scenario2.amortizationYears === period ? 'bg-gold text-white border-gold shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'"
+                                    >
+                                        {{ period }} years
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Custom Amortization Input -->
+                            <div class="mt-4">
+                                <label class="block text-xs text-gray-600 mb-1">Or enter custom period:</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        v-model.number="scenario2.amortizationYears"
+                                        :min="5"
+                                        :max="30"
+                                        :step="1"
+                                        class="w-full pl-4 pr-16 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        placeholder="Enter years"
+                                    />
+                                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                                </div>
+                                <div class="mt-1 text-xs text-gray-500">
+                                    Maximum 30 years for Canadian mortgages
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Interest Term</label>
+                            
+                            <!-- Current Interest Term Display -->
+                            <div class="text-xl font-semibold text-black mb-4">{{ scenario2.interestTerm }} {{ scenario2.interestTerm === 1 ? 'year' : 'years' }}</div>
+                            
+                            <!-- Interest Term Button Selector -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Select Term:</label>
+                                <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                                    <button 
+                                        v-for="term in mortgageConfig.interestTerms" 
+                                        :key="term"
+                                        @click="scenario2.interestTerm = term"
+                                        class="px-3 py-2 text-sm font-medium border rounded-md transition-colors"
+                                        :class="scenario2.interestTerm === term ? 'bg-gold text-white border-gold shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'"
+                                    >
+                                        {{ term }} {{ term === 1 ? 'yr' : 'yrs' }}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Custom Interest Term Input -->
+                            <div class="mt-4">
+                                <label class="block text-xs text-gray-600 mb-1">Or enter custom term:</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        v-model.number="scenario2.interestTerm"
+                                        :min="1"
+                                        :max="scenario2.amortizationYears"
+                                        :step="1"
+                                        class="w-full pl-4 pr-16 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        placeholder="Enter years"
+                                    />
+                                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                                </div>
+                                <div class="mt-1 text-xs text-gray-500">
+                                    Cannot exceed amortization period ({{ scenario2.amortizationYears }} years)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-black mb-2">Payment Frequency</label>
+                            
+                            <!-- Current Payment Frequency Display -->
+                            <div class="text-xl font-semibold text-black mb-4">{{ mortgageConfig.paymentFrequencies[scenario2.paymentFrequency].label }}</div>
+                            
+                            <!-- Payment Frequency Selector -->
+                            <div class="mb-4">
+                                <label class="block text-xs text-gray-600 mb-2">Select Frequency:</label>
+                                <div class="space-y-2">
+                                    <div 
+                                        v-for="(frequency, key) in mortgageConfig.paymentFrequencies" 
+                                        :key="key"
+                                        class="flex items-center"
+                                    >
+                                        <input 
+                                            type="radio" 
+                                            :id="'frequency2-' + key"
+                                            :value="key"
+                                            v-model="scenario2.paymentFrequency"
+                                            class="w-4 h-4 text-gold bg-gray-100 border-gray-300 focus:ring-gold focus:ring-2"
+                                        />
+                                        <label 
+                                            :for="'frequency2-' + key" 
+                                            class="ml-2 text-sm font-medium text-gray-900 cursor-pointer"
+                                        >
+                                            {{ frequency.label }}
+                                            <span class="text-gray-500 text-xs ml-1">({{ frequency.value }} payments/year)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Frequency Information -->
+                            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                <div class="text-sm">
+                                    <div class="font-medium text-blue-900 mb-1">Payment Information:</div>
+                                    <div class="text-blue-700">
+                                        <div>Frequency: {{ mortgageConfig.paymentFrequencies[scenario2.paymentFrequency].label }}</div>
+                                        <div>Payments per year: {{ mortgageConfig.paymentFrequencies[scenario2.paymentFrequency].value }}</div>
+                                        <div v-if="isCalculationValid2">Payment amount: ${{ Math.round(actualPayment2).toLocaleString() }}</div>
+                                    </div>
+                                    <div class="text-xs text-blue-600 mt-1">
+                                        <span v-if="scenario2.paymentFrequency === 'acceleratedBiWeekly' || scenario2.paymentFrequency === 'acceleratedWeekly'">
+                                            Accelerated payments help pay off your mortgage faster by making extra principal payments.
+                                        </span>
+                                        <span v-else-if="scenario2.paymentFrequency === 'biWeekly' || scenario2.paymentFrequency === 'weekly'">
+                                            More frequent payments can reduce total interest paid over the life of the mortgage.
+                                        </span>
+                                        <span v-else>
+                                            Monthly payments are the most common payment frequency for Canadian mortgages.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Results Section -->
+                <section class="space-y-6">
+                    <!-- Payment Summary Card -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-semibold text-black mb-6 flex items-center">
+                            <svg class="w-6 h-6 text-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                            Payment Summary
+                        </h2>
+                        
+                        <div v-if="!isCalculationValid" class="p-4 bg-red-50 border border-red-200 rounded-md mb-6">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <div class="text-red-700 font-medium mb-1">Unable to calculate payments</div>
+                                    <div class="text-red-600 text-sm">Please correct the input errors to see payment calculations.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-else class="space-y-6">
+                            <!-- Primary Payment Display -->
+                            <div class="text-center p-6 bg-gradient-to-r from-gold/10 to-gold/5 rounded-lg border border-gold/20">
+                                <div class="text-sm text-gray-600 mb-2">{{ mortgageConfig.paymentFrequencies[paymentFrequency].label }} Payment</div>
+                                <div class="text-4xl font-bold text-gold mb-2">${{ Math.round(actualPayment).toLocaleString() }}</div>
+                                <div class="text-sm text-gray-500">
+                                    Monthly equivalent: ${{ Math.round(monthlyPayment).toLocaleString() }}
+                                </div>
+                            </div>
+                            
+                            <!-- Key Financial Metrics -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-1">Total Interest Paid</div>
+                                    <div class="text-2xl font-bold text-black">${{ Math.round(totalInterest).toLocaleString() }}</div>
+                                    <div class="text-xs text-gray-500 mt-1">Over {{ amortizationYears }} years</div>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-1">Effective Interest Rate</div>
+                                    <div class="text-2xl font-bold text-black">{{ displayInterestRate }}%</div>
+                                    <div class="text-xs text-gray-500 mt-1">{{ rateType === 'variable' ? 'Variable rate' : 'Fixed rate' }}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Frequency Information -->
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <div class="text-blue-900 font-medium text-sm mb-1">Payment Schedule</div>
+                                        <div class="text-blue-700 text-sm">
+                                            <div>Frequency: {{ mortgageConfig.paymentFrequencies[paymentFrequency].label }}</div>
+                                            <div>Payments per year: {{ mortgageConfig.paymentFrequencies[paymentFrequency].value }}</div>
+                                            <div>Total payments: {{ totalPayments.toLocaleString() }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Total Cost Summary -->
+                            <div class="border-t border-gray-200 pt-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gray-600">Mortgage Principal</span>
+                                    <span class="font-semibold text-black">${{ mortgageAmount.toLocaleString() }}</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gray-600">Total Interest</span>
+                                    <span class="font-semibold text-black">${{ Math.round(totalInterest).toLocaleString() }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-lg font-bold border-t border-gray-200 pt-2">
+                                    <span class="text-black">Total Cost</span>
+                                    <span class="text-gold">${{ Math.round(mortgageAmount + totalInterest).toLocaleString() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- CMHC Insurance Display Card -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-semibold text-black mb-6 flex items-center">
+                            <svg class="w-6 h-6 text-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            CMHC Insurance
+                        </h2>
+                        
+                        <div v-if="!isCalculationValid" class="p-4 bg-gray-50 border border-gray-200 rounded-md">
+                            <div class="text-gray-600 text-center">
+                                Complete the mortgage details above to see CMHC insurance information.
+                            </div>
+                        </div>
+                        
+                        <div v-else-if="cmhcInsurance === 0" class="space-y-4">
+                            <!-- No Insurance Required -->
+                            <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <div class="text-green-700 font-medium mb-1">No CMHC Insurance Required</div>
+                                        <div class="text-green-600 text-sm">
+                                            Your down payment of {{ downPaymentPercent.toFixed(1) }}% meets the 20% minimum requirement.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Mortgage Amount Breakdown -->
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Home Price</span>
+                                    <span class="font-semibold text-black">${{ homePrice.toLocaleString() }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Down Payment ({{ downPaymentPercent.toFixed(1) }}%)</span>
+                                    <span class="font-semibold text-green-600">-${{ downPayment.toLocaleString() }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">CMHC Insurance</span>
+                                    <span class="font-semibold text-gray-500">$0</span>
+                                </div>
+                                <div class="flex justify-between items-center text-lg font-bold border-t border-gray-200 pt-2">
+                                    <span class="text-black">Total Mortgage Amount</span>
+                                    <span class="text-gold">${{ mortgageAmount.toLocaleString() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-else class="space-y-4">
+                            <!-- Insurance Required -->
+                            <div class="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-orange-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <div class="text-orange-700 font-medium mb-1">CMHC Insurance Required</div>
+                                        <div class="text-orange-600 text-sm">
+                                            Down payment of {{ downPaymentPercent.toFixed(1) }}% is below 20% minimum.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Insurance Details -->
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="text-center mb-4">
+                                    <div class="text-sm text-gray-600 mb-1">CMHC Insurance Premium</div>
+                                    <div class="text-3xl font-bold text-red-600">${{ Math.round(cmhcInsurance).toLocaleString() }}</div>
+                                    <div class="text-sm text-gray-500">{{ cmhcRate }}% of mortgage amount</div>
+                                </div>
+                                
+                                <div class="text-xs text-gray-600 text-center">
+                                    Insurance premium is added to your mortgage principal
+                                </div>
+                            </div>
+                            
+                            <!-- Mortgage Amount Breakdown -->
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Home Price</span>
+                                    <span class="font-semibold text-black">${{ homePrice.toLocaleString() }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Down Payment ({{ downPaymentPercent.toFixed(1) }}%)</span>
+                                    <span class="font-semibold text-green-600">-${{ downPayment.toLocaleString() }}</span>
+                                </div>
+                                <div class="flex justify-between items-center border-t border-gray-200 pt-2">
+                                    <span class="text-sm text-gray-600">Base Mortgage</span>
+                                    <span class="font-semibold text-black">${{ baseMortgageAmount.toLocaleString() }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">CMHC Insurance ({{ cmhcRate }}%)</span>
+                                    <span class="font-semibold text-red-600">+${{ Math.round(cmhcInsurance).toLocaleString() }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-lg font-bold border-t border-gray-200 pt-2">
+                                    <span class="text-black">Total Mortgage Amount</span>
+                                    <span class="text-gold">${{ mortgageAmount.toLocaleString() }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- CMHC Rate Information -->
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                <div class="text-sm">
+                                    <div class="font-medium text-blue-900 mb-1">CMHC Insurance Rates</div>
+                                    <div class="text-blue-700 text-xs space-y-1">
+                                        <div>5.00% - 9.99% down: 4.00% premium</div>
+                                        <div>10.00% - 14.99% down: 3.10% premium</div>
+                                        <div>15.00% - 19.99% down: 2.80% premium</div>
+                                        <div>20.00%+ down: No insurance required</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mortgage Breakdown Card -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-semibold text-black mb-6 flex items-center">
+                            <svg class="w-6 h-6 text-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Payment Breakdown
+                        </h2>
+                        
+                        <div v-if="!isCalculationValid" class="p-4 bg-gray-50 border border-gray-200 rounded-md">
+                            <div class="text-gray-600 text-center">
+                                Complete the mortgage details above to see payment breakdown.
+                            </div>
+                        </div>
+                        
+                        <div v-else class="space-y-6">
+                            <!-- Balance Over Time -->
+                            <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                                <div class="text-center mb-4">
+                                    <div class="text-sm text-gray-600 mb-1">Mortgage Balance Remaining</div>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
+                                        <div class="text-center">
+                                            <div class="text-xs text-gray-500">After 1 year</div>
+                                            <div class="text-lg font-bold text-blue-700">
+                                                ${{ Math.round(mortgageBalanceAfterPayments(mortgageConfig.paymentFrequencies[paymentFrequency].value)).toLocaleString() }}
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-xs text-gray-500">After 5 years</div>
+                                            <div class="text-lg font-bold text-blue-700">
+                                                ${{ Math.round(mortgageBalanceAfterPayments(5 * mortgageConfig.paymentFrequencies[paymentFrequency].value)).toLocaleString() }}
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-xs text-gray-500">After 10 years</div>
+                                            <div class="text-lg font-bold text-blue-700">
+                                                ${{ Math.round(mortgageBalanceAfterPayments(10 * mortgageConfig.paymentFrequencies[paymentFrequency].value)).toLocaleString() }}
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-xs text-gray-500">After {{ Math.min(15, amortizationYears) }} years</div>
+                                            <div class="text-lg font-bold text-blue-700">
+                                                ${{ Math.round(mortgageBalanceAfterPayments(Math.min(15, amortizationYears) * mortgageConfig.paymentFrequencies[paymentFrequency].value)).toLocaleString() }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- First Few Payments Breakdown -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-black mb-4">First {{ Math.min(12, paymentBreakdown.length) }} Payments Breakdown</h3>
+                                
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="bg-gray-50 border-b border-gray-200">
+                                                <th class="text-left py-2 px-3 font-medium text-gray-700">Payment #</th>
+                                                <th class="text-right py-2 px-3 font-medium text-gray-700">Total Payment</th>
+                                                <th class="text-right py-2 px-3 font-medium text-gray-700">Principal</th>
+                                                <th class="text-right py-2 px-3 font-medium text-gray-700">Interest</th>
+                                                <th class="text-right py-2 px-3 font-medium text-gray-700">Balance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="payment in paymentBreakdown.slice(0, 12)" :key="payment.paymentNumber" class="border-b border-gray-100 hover:bg-gray-50">
+                                                <td class="py-2 px-3 font-medium text-gray-900">{{ payment.paymentNumber }}</td>
+                                                <td class="py-2 px-3 text-right font-semibold text-black">${{ Math.round(payment.totalPayment).toLocaleString() }}</td>
+                                                <td class="py-2 px-3 text-right text-green-600">${{ Math.round(payment.principalPayment).toLocaleString() }}</td>
+                                                <td class="py-2 px-3 text-right text-red-600">${{ Math.round(payment.interestPayment).toLocaleString() }}</td>
+                                                <td class="py-2 px-3 text-right font-medium text-gray-900">${{ Math.round(payment.remainingBalance).toLocaleString() }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Summary of First Year -->
+                                <div class="mt-4 p-3 bg-gray-50 rounded-md">
+                                    <div class="text-sm text-gray-600 mb-2 font-medium">First Year Summary:</div>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                        <div>
+                                            <div class="text-gray-500">Total Payments</div>
+                                            <div class="font-semibold text-black">
+                                                ${{ Math.round(paymentBreakdown.slice(0, Math.min(12, paymentBreakdown.length)).reduce((sum, p) => sum + p.totalPayment, 0)).toLocaleString() }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="text-gray-500">Principal Paid</div>
+                                            <div class="font-semibold text-green-600">
+                                                ${{ Math.round(paymentBreakdown.slice(0, Math.min(12, paymentBreakdown.length)).reduce((sum, p) => sum + p.principalPayment, 0)).toLocaleString() }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="text-gray-500">Interest Paid</div>
+                                            <div class="font-semibold text-red-600">
+                                                ${{ Math.round(paymentBreakdown.slice(0, Math.min(12, paymentBreakdown.length)).reduce((sum, p) => sum + p.interestPayment, 0)).toLocaleString() }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Vue.js 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Vue.js Application -->
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // Configuration Object with CMHC rates and payment frequencies
+                    mortgageConfig: {
+                        // CMHC Insurance Rates (based on down payment percentage)
+                        cmhcRates: {
+                            '5-9.99': 4.00,    // 5% to 9.99% down payment
+                            '10-14.99': 3.10,  // 10% to 14.99% down payment  
+                            '15-19.99': 2.80,  // 15% to 19.99% down payment
+                            '20+': 0.00        // 20%+ down payment (no insurance)
+                        },
+                        
+                        // Payment Frequencies (payments per year)
+                        paymentFrequencies: {
+                            monthly: { value: 12, label: 'Monthly' },
+                            semiMonthly: { value: 24, label: 'Semi-Monthly' },
+                            biWeekly: { value: 26, label: 'Bi-Weekly' },
+                            weekly: { value: 52, label: 'Weekly' },
+                            acceleratedBiWeekly: { value: 26, label: 'Accelerated Bi-Weekly' },
+                            acceleratedWeekly: { value: 52, label: 'Accelerated Weekly' }
+                        },
+                        
+                        // Canadian Down Payment Rules
+                        downPaymentRules: {
+                            under500k: 0.05,      // 5% minimum
+                            between500k1m: {      // 5% on first 500k, 10% on remainder
+                                first500k: 0.05,
+                                remainder: 0.10
+                            },
+                            over1m: 0.20          // 20% minimum
+                        },
+                        
+                        // Common amortization periods (years)
+                        amortizationPeriods: [15, 20, 25, 30],
+                        
+                        // Common interest terms (years)
+                        interestTerms: [1, 2, 3, 5, 7, 10],
+                        
+                        // Input ranges and defaults
+                        ranges: {
+                            homePrice: { min: 100000, max: 2000000, step: 5000, default: 500000 },
+                            downPayment: { min: 0, max: 1000000, step: 1000, default: 25000 },
+                            interestRate: { min: 1.0, max: 15.0, step: 0.01, default: 5.25 },
+                            variableDiscount: { min: 0.0, max: 3.0, step: 0.01, default: 0.5 },
+                            primeRate: { min: 1.0, max: 15.0, step: 0.01, default: 6.45 }
+                        }
+                    },
+                    
+                    // Prime Rate Configuration
+                    primeRate: 6.45,
+                    
+                    // User Input Properties
+                    homePrice: 500000,
+                    downPayment: 25000,
+                    interestRate: 5.25,
+                    rateType: 'fixed', // 'fixed' or 'variable'
+                    variableDiscount: 0.5,
+                    amortizationYears: 25,
+                    interestTerm: 5,
+                    paymentFrequency: 'monthly',
+                    
+                    // Comparison Mode Properties
+                    comparisonMode: false,
+                    scenario2: {
+                        homePrice: 500000,
+                        downPayment: 25000,
+                        interestRate: 5.25,
+                        rateType: 'fixed',
+                        variableDiscount: 0.5,
+                        amortizationYears: 25,
+                        interestTerm: 5,
+                        paymentFrequency: 'monthly'
+                    },
+                    
+                    // UI State Properties
+                    showAdvancedOptions: false,
+                    calculationErrors: [],
+                    isCalculating: false
+                }
+            },
+            computed: {
+                /**
+                 * Calculate the effective interest rate being used
+                 */
+                effectiveInterestRate() {
+                    const rate = this.rateType === 'variable' 
+                        ? (this.primeRate - this.variableDiscount) / 100
+                        : this.interestRate / 100;
+                    
+                    return this.calculateEffectiveAnnualRate(rate);
+                },
+
+                /**
+                 * Calculate the periodic interest rate
+                 */
+                periodicInterestRate() {
+                    const paymentsPerYear = this.getPaymentFrequency(this.paymentFrequency);
+                    return this.calculatePeriodicRate(this.effectiveInterestRate, paymentsPerYear);
+                },
+
+                /**
+                 * Calculate the mortgage amount (home price minus down payment)
+                 */
+                baseMortgageAmount() {
+                    return Math.max(0, this.homePrice - this.downPayment);
+                },
+
+                /**
+                 * Calculate CMHC insurance premium
+                 */
+                cmhcInsurance() {
+                    if (!this.isDownPaymentValid) return 0;
+                    return this.calculateCMHCInsurance(this.homePrice, this.downPayment);
+                },
+
+                /**
+                 * Calculate total mortgage amount including CMHC insurance
+                 */
+                mortgageAmount() {
+                    if (!this.isDownPaymentValid) return 0;
+                    return this.calculateTotalMortgageAmount(this.homePrice, this.downPayment);
+                },
+
+                /**
+                 * Get CMHC insurance rate percentage
+                 */
+                cmhcRate() {
+                    const downPaymentPercent = (this.downPayment / this.homePrice) * 100;
+                    return this.getCMHCRate(downPaymentPercent);
+                },
+
+                /**
+                 * Calculate total number of payments
+                 */
+                totalPayments() {
+                    const paymentsPerYear = this.getPaymentFrequency(this.paymentFrequency);
+                    return this.calculateTotalPayments(this.amortizationYears, paymentsPerYear);
+                },
+
+                /**
+                 * Calculate monthly payment amount
+                 */
+                monthlyPayment() {
+                    if (!this.isCalculationValid || this.mortgageAmount <= 0) return 0;
+                    
+                    const payment = this.calculateMortgagePayment(
+                        this.mortgageAmount,
+                        this.periodicInterestRate,
+                        this.totalPayments
+                    );
+                    
+                    // Convert to monthly equivalent if not monthly frequency
+                    const paymentsPerYear = this.getPaymentFrequency(this.paymentFrequency);
+                    if (paymentsPerYear !== 12) {
+                        return (payment * paymentsPerYear) / 12;
+                    }
+                    
+                    return payment;
+                },
+
+                /**
+                 * Calculate actual payment amount for selected frequency
+                 */
+                actualPayment() {
+                    if (!this.isCalculationValid || this.mortgageAmount <= 0) return 0;
+                    
+                    return this.calculateMortgagePayment(
+                        this.mortgageAmount,
+                        this.periodicInterestRate,
+                        this.totalPayments
+                    );
+                },
+
+                /**
+                 * Calculate total interest paid over the life of the mortgage
+                 */
+                totalInterest() {
+                    if (!this.isCalculationValid || this.mortgageAmount <= 0) return 0;
+                    
+                    const payment = this.calculateMortgagePayment(
+                        this.mortgageAmount,
+                        this.periodicInterestRate,
+                        this.totalPayments
+                    );
+                    
+                    const totalPaid = payment * this.totalPayments;
+                    return totalPaid - this.mortgageAmount;
+                },
+
+                /**
+                 * Get minimum down payment required for current home price
+                 */
+                minimumDownPayment() {
+                    return this.calculateMinimumDownPayment(this.homePrice);
+                },
+
+                /**
+                 * Get current down payment validation status
+                 */
+                downPaymentValidation() {
+                    return this.validateDownPayment(this.homePrice, this.downPayment);
+                },
+
+                /**
+                 * Check if current down payment is valid
+                 */
+                isDownPaymentValid() {
+                    return this.downPaymentValidation.isValid;
+                },
+
+                /**
+                 * Get down payment error message if invalid
+                 */
+                downPaymentErrorMessage() {
+                    return this.downPaymentValidation.errorMessage;
+                },
+
+                /**
+                 * Calculate down payment as percentage of home price
+                 */
+                downPaymentPercent() {
+                    if (this.homePrice <= 0) return 0;
+                    return (this.downPayment / this.homePrice) * 100;
+                },
+
+                /**
+                 * Calculate minimum down payment as percentage of home price
+                 */
+                minimumDownPaymentPercent() {
+                    if (this.homePrice <= 0) return 0;
+                    return (this.minimumDownPayment / this.homePrice) * 100;
+                },
+
+                /**
+                 * Validate all input values for calculation
+                 */
+                inputValidation() {
+                    const errors = [];
+                    
+                    // Validate home price
+                    if (this.homePrice <= 0) {
+                        errors.push({ field: 'homePrice', message: 'Home price must be greater than zero.' });
+                    } else if (this.homePrice < this.mortgageConfig.ranges.homePrice.min) {
+                        errors.push({ field: 'homePrice', message: `Home price must be at least $${this.mortgageConfig.ranges.homePrice.min.toLocaleString()}.` });
+                    } else if (this.homePrice > this.mortgageConfig.ranges.homePrice.max) {
+                        errors.push({ field: 'homePrice', message: `Home price cannot exceed $${this.mortgageConfig.ranges.homePrice.max.toLocaleString()}.` });
+                    }
+                    
+                    // Validate interest rate
+                    const currentRate = this.rateType === 'variable' 
+                        ? (this.primeRate - this.variableDiscount)
+                        : this.interestRate;
+                        
+                    if (currentRate <= 0) {
+                        errors.push({ field: 'interestRate', message: 'Interest rate must be greater than zero.' });
+                    } else if (currentRate > 15) {
+                        errors.push({ field: 'interestRate', message: 'Interest rate cannot exceed 15%.' });
+                    }
+                    
+                    // Validate amortization period
+                    if (this.amortizationYears <= 0) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be greater than zero.' });
+                    } else if (this.amortizationYears > 30) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period cannot exceed 30 years in Canada.' });
+                    }
+                    
+                    // Validate interest term
+                    if (this.interestTerm <= 0) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term must be greater than zero.' });
+                    } else if (this.interestTerm > this.amortizationYears) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term cannot exceed amortization period.' });
+                    }
+                    
+                    // Add down payment validation
+                    if (!this.isDownPaymentValid) {
+                        errors.push({ field: 'downPayment', message: this.downPaymentErrorMessage });
+                    }
+                    
+                    return {
+                        isValid: errors.length === 0,
+                        errors: errors
+                    };
+                },
+
+                /**
+                 * Check if all inputs are valid for calculation
+                 */
+                isCalculationValid() {
+                    return this.inputValidation.isValid;
+                },
+
+                /**
+                 * Get all validation errors
+                 */
+                validationErrors() {
+                    return this.inputValidation.errors;
+                },
+
+                /**
+                 * Get display rate for current rate type
+                 */
+                displayInterestRate() {
+                    if (this.rateType === 'variable') {
+                        return (this.primeRate - this.variableDiscount).toFixed(2);
+                    }
+                    return this.interestRate.toFixed(2);
+                },
+
+                /**
+                 * Calculate mortgage balance remaining after specified number of payments
+                 */
+                mortgageBalanceAfterPayments() {
+                    return (paymentsCompleted) => {
+                        if (!this.isCalculationValid || this.mortgageAmount <= 0 || paymentsCompleted <= 0) {
+                            return this.mortgageAmount;
+                        }
+                        
+                        const payment = this.calculateMortgagePayment(
+                            this.mortgageAmount,
+                            this.periodicInterestRate,
+                            this.totalPayments
+                        );
+                        
+                        let balance = this.mortgageAmount;
+                        
+                        for (let i = 0; i < Math.min(paymentsCompleted, this.totalPayments); i++) {
+                            const interestPayment = balance * this.periodicInterestRate;
+                            const principalPayment = payment - interestPayment;
+                            balance -= principalPayment;
+                        }
+                        
+                        return Math.max(0, balance);
+                    };
+                },
+
+                /**
+                 * Calculate payment breakdown for first few payments
+                 */
+                paymentBreakdown() {
+                    if (!this.isCalculationValid || this.mortgageAmount <= 0) {
+                        return [];
+                    }
+                    
+                    const payment = this.calculateMortgagePayment(
+                        this.mortgageAmount,
+                        this.periodicInterestRate,
+                        this.totalPayments
+                    );
+                    
+                    const breakdown = [];
+                    let balance = this.mortgageAmount;
+                    
+                    // Calculate first 12 payments or first year, whichever is less
+                    const paymentsToShow = Math.min(12, this.totalPayments);
+                    
+                    for (let i = 1; i <= paymentsToShow; i++) {
+                        const interestPayment = balance * this.periodicInterestRate;
+                        const principalPayment = payment - interestPayment;
+                        balance -= principalPayment;
+                        
+                        breakdown.push({
+                            paymentNumber: i,
+                            totalPayment: payment,
+                            principalPayment: principalPayment,
+                            interestPayment: interestPayment,
+                            remainingBalance: Math.max(0, balance)
+                        });
+                    }
+                    
+                    return breakdown;
+                }
+            },
+            methods: {
+                /**
+                 * Calculate effective annual rate with semi-annual compounding
+                 * Formula: re = (1 + r/2)^2 - 1
+                 * @param {number} nominalRate - Annual nominal interest rate (as decimal)
+                 * @returns {number} Effective annual rate (as decimal)
+                 */
+                calculateEffectiveAnnualRate(nominalRate) {
+                    return Math.pow(1 + nominalRate / 2, 2) - 1;
+                },
+
+                /**
+                 * Calculate periodic rate for different payment frequencies
+                 * Formula: rp = (1 + re)^(1/n) - 1
+                 * @param {number} effectiveRate - Effective annual rate (as decimal)
+                 * @param {number} paymentsPerYear - Number of payments per year
+                 * @returns {number} Periodic rate (as decimal)
+                 */
+                calculatePeriodicRate(effectiveRate, paymentsPerYear) {
+                    return Math.pow(1 + effectiveRate, 1 / paymentsPerYear) - 1;
+                },
+
+                /**
+                 * Calculate mortgage payment using Canadian mortgage formula
+                 * Formula: P = (rp × A) / (1 - (1 + rp)^(-m))
+                 * @param {number} mortgageAmount - Principal mortgage amount
+                 * @param {number} periodicRate - Periodic interest rate (as decimal)
+                 * @param {number} totalPayments - Total number of payments
+                 * @returns {number} Payment amount
+                 */
+                calculateMortgagePayment(mortgageAmount, periodicRate, totalPayments) {
+                    if (periodicRate === 0) {
+                        // Handle zero interest rate case
+                        return mortgageAmount / totalPayments;
+                    }
+                    
+                    const numerator = periodicRate * mortgageAmount;
+                    const denominator = 1 - Math.pow(1 + periodicRate, -totalPayments);
+                    
+                    return numerator / denominator;
+                },
+
+                /**
+                 * Get payment frequency multiplier
+                 * @param {string} frequency - Payment frequency type
+                 * @returns {number} Number of payments per year
+                 */
+                getPaymentFrequency(frequency) {
+                    const frequencyConfig = this.mortgageConfig.paymentFrequencies[frequency];
+                    return frequencyConfig ? frequencyConfig.value : 12; // Default to monthly
+                },
+
+                /**
+                 * Calculate total number of payments
+                 * @param {number} amortizationYears - Amortization period in years
+                 * @param {number} paymentsPerYear - Number of payments per year
+                 * @returns {number} Total number of payments
+                 */
+                calculateTotalPayments(amortizationYears, paymentsPerYear) {
+                    return amortizationYears * paymentsPerYear;
+                },
+
+                /**
+                 * Get CMHC insurance rate based on down payment percentage
+                 * @param {number} downPaymentPercent - Down payment as percentage of home price
+                 * @returns {number} CMHC insurance rate (as percentage)
+                 */
+                getCMHCRate(downPaymentPercent) {
+                    const rates = this.mortgageConfig.cmhcRates;
+                    
+                    if (downPaymentPercent >= 20) {
+                        return rates['20+']; // No insurance required for 20%+ down payment
+                    } else if (downPaymentPercent >= 15) {
+                        return rates['15-19.99']; // 15% to 19.99% down payment
+                    } else if (downPaymentPercent >= 10) {
+                        return rates['10-14.99']; // 10% to 14.99% down payment
+                    } else {
+                        return rates['5-9.99']; // 5% to 9.99% down payment
+                    }
+                },
+
+                /**
+                 * Calculate CMHC insurance premium
+                 * @param {number} homePrice - Home purchase price
+                 * @param {number} downPayment - Down payment amount
+                 * @returns {number} CMHC insurance premium amount
+                 */
+                calculateCMHCInsurance(homePrice, downPayment) {
+                    const downPaymentPercent = (downPayment / homePrice) * 100;
+                    
+                    // No insurance required for 20%+ down payment
+                    if (downPaymentPercent >= 20) {
+                        return 0;
+                    }
+                    
+                    const mortgageAmount = homePrice - downPayment;
+                    const rate = this.getCMHCRate(downPaymentPercent);
+                    
+                    return mortgageAmount * (rate / 100);
+                },
+
+                /**
+                 * Calculate total mortgage amount including CMHC insurance
+                 * @param {number} homePrice - Home purchase price
+                 * @param {number} downPayment - Down payment amount
+                 * @returns {number} Total mortgage amount including insurance
+                 */
+                calculateTotalMortgageAmount(homePrice, downPayment) {
+                    const baseMortgage = homePrice - downPayment;
+                    const cmhcInsurance = this.calculateCMHCInsurance(homePrice, downPayment);
+                    
+                    return baseMortgage + cmhcInsurance;
+                },
+
+                /**
+                 * Calculate minimum down payment required for a given home price
+                 * Based on Canadian regulations:
+                 * - Under $500,000: 5% minimum
+                 * - $500,000 to $999,999: 5% on first $500k, 10% on remainder
+                 * - $1,000,000+: 20% minimum
+                 * @param {number} homePrice - Home purchase price
+                 * @returns {number} Minimum down payment amount required
+                 */
+                calculateMinimumDownPayment(homePrice) {
+                    const rules = this.mortgageConfig.downPaymentRules;
+                    
+                    if (homePrice < 500000) {
+                        // Under $500k: 5% minimum
+                        return homePrice * rules.under500k;
+                    } else if (homePrice < 1000000) {
+                        // $500k to $999,999: 5% on first $500k, 10% on remainder
+                        const first500k = 500000 * rules.between500k1m.first500k; // $25,000
+                        const remainder = (homePrice - 500000) * rules.between500k1m.remainder;
+                        return first500k + remainder;
+                    } else {
+                        // $1M+: 20% minimum
+                        return homePrice * rules.over1m;
+                    }
+                },
+
+                /**
+                 * Validate down payment against Canadian requirements
+                 * @param {number} homePrice - Home purchase price
+                 * @param {number} downPayment - Proposed down payment amount
+                 * @returns {Object} Validation result with isValid flag and error message
+                 */
+                validateDownPayment(homePrice, downPayment) {
+                    // Check if down payment exceeds home price
+                    if (downPayment > homePrice) {
+                        return {
+                            isValid: false,
+                            errorMessage: 'Down payment cannot exceed the home price.',
+                            errorType: 'exceeds_price'
+                        };
+                    }
+
+                    // Check if down payment is negative
+                    if (downPayment < 0) {
+                        return {
+                            isValid: false,
+                            errorMessage: 'Down payment must be a positive amount.',
+                            errorType: 'negative_amount'
+                        };
+                    }
+
+                    // Calculate minimum required down payment
+                    const minimumRequired = this.calculateMinimumDownPayment(homePrice);
+                    
+                    // Check if down payment meets minimum requirements
+                    if (downPayment < minimumRequired) {
+                        const minimumPercent = ((minimumRequired / homePrice) * 100).toFixed(2);
+                        const currentPercent = ((downPayment / homePrice) * 100).toFixed(2);
+                        
+                        let errorMessage = '';
+                        if (homePrice < 500000) {
+                            errorMessage = `Minimum down payment required is 5% ($${minimumRequired.toLocaleString()}) for homes under $500,000. Current down payment is ${currentPercent}%.`;
+                        } else if (homePrice < 1000000) {
+                            errorMessage = `Minimum down payment required is $${minimumRequired.toLocaleString()} (5% on first $500,000 + 10% on remainder) for homes between $500,000-$999,999. Current down payment is ${currentPercent}%.`;
+                        } else {
+                            errorMessage = `Minimum down payment required is 20% ($${minimumRequired.toLocaleString()}) for homes $1,000,000 and above. Current down payment is ${currentPercent}%.`;
+                        }
+                        
+                        return {
+                            isValid: false,
+                            errorMessage: errorMessage,
+                            errorType: 'insufficient_amount',
+                            minimumRequired: minimumRequired,
+                            currentPercent: parseFloat(currentPercent),
+                            minimumPercent: parseFloat(minimumPercent)
+                        };
+                    }
+
+                    // Validation passed
+                    return {
+                        isValid: true,
+                        errorMessage: null,
+                        errorType: null
+                    };
+                },
+
+                /**
+                 * Get down payment validation status and error message
+                 * @returns {Object} Current validation status
+                 */
+                getDownPaymentValidation() {
+                    return this.validateDownPayment(this.homePrice, this.downPayment);
+                },
+
+                /**
+                 * Update home price from slider input
+                 * @param {Event} event - Input event from slider
+                 */
+                updateHomePrice(event) {
+                    const newPrice = parseInt(event.target.value);
+                    this.homePrice = newPrice;
+                },
+
+                /**
+                 * Update down payment from dollar amount input
+                 * @param {Event} event - Input event from dollar input
+                 */
+                updateDownPaymentFromDollar(event) {
+                    const newAmount = parseFloat(event.target.value) || 0;
+                    this.downPayment = Math.max(0, Math.min(newAmount, this.homePrice));
+                },
+
+                /**
+                 * Update down payment from percentage input
+                 * @param {Event} event - Input event from percentage input
+                 */
+                updateDownPaymentFromPercent(event) {
+                    const newPercent = parseFloat(event.target.value) || 0;
+                    const newAmount = (this.homePrice * newPercent) / 100;
+                    this.downPayment = Math.max(0, Math.min(newAmount, this.homePrice));
+                },
+
+                /**
+                 * Set down payment to a specific percentage
+                 * @param {number} percent - Percentage to set (5, 10, 15, 20, 25)
+                 */
+                setDownPaymentPercent(percent) {
+                    const newAmount = (this.homePrice * percent) / 100;
+                    this.downPayment = Math.round(newAmount);
+                }
+            },
+            watch: {
+                // Watch for changes in home price and update down payment if needed
+                homePrice(newPrice, oldPrice) {
+                    // If down payment percentage stays the same, update dollar amount
+                    if (oldPrice > 0) {
+                        const currentPercent = this.downPayment / oldPrice;
+                        const newDownPayment = newPrice * currentPercent;
+                        
+                        // Only update if the new amount meets minimum requirements
+                        const minRequired = this.calculateMinimumDownPayment(newPrice);
+                        if (newDownPayment >= minRequired) {
+                            this.downPayment = Math.round(newDownPayment);
+                        } else {
+                            // Set to minimum required if current percentage is too low
+                            this.downPayment = Math.round(minRequired);
+                        }
+                    }
+                },
+                
+                // Watch for changes in rate type and update effective rate
+                rateType(newType) {
+                    // Trigger recalculation by updating a reactive property
+                    this.$nextTick(() => {
+                        // Force reactivity update
+                        this.isCalculating = true;
+                        this.$nextTick(() => {
+                            this.isCalculating = false;
+                        });
+                    });
+                },
+                
+                // Watch for changes in prime rate (affects variable rates)
+                primeRate(newRate) {
+                    if (this.rateType === 'variable') {
+                        // Trigger recalculation for variable rates
+                        this.$nextTick(() => {
+                            this.isCalculating = true;
+                            this.$nextTick(() => {
+                                this.isCalculating = false;
+                            });
+                        });
+                    }
+                },
+                
+                // Watch for changes in variable discount (affects variable rates)
+                variableDiscount(newDiscount) {
+                    if (this.rateType === 'variable') {
+                        // Trigger recalculation for variable rates
+                        this.$nextTick(() => {
+                            this.isCalculating = true;
+                            this.$nextTick(() => {
+                                this.isCalculating = false;
+                            });
+                        });
+                    }
+                },
+                
+                // Watch for validation errors and update UI state
+                validationErrors: {
+                    handler(newErrors) {
+                        this.calculationErrors = newErrors;
+                    },
+                    deep: true
+                },
+                
+                // Watch for changes in payment frequency and trigger updates
+                paymentFrequency() {
+                    this.$nextTick(() => {
+                        this.isCalculating = true;
+                        this.$nextTick(() => {
+                            this.isCalculating = false;
+                        });
+                    });
+                },
+                
+                // Watch for changes in amortization years
+                amortizationYears() {
+                    // Ensure interest term doesn't exceed amortization period
+                    if (this.interestTerm > this.amortizationYears) {
+                        this.interestTerm = this.amortizationYears;
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
