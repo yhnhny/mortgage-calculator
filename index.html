@@ -27,45 +27,49 @@
         /* Custom slider styling for webkit browsers */
         input[type="range"]::-webkit-slider-thumb {
             appearance: none;
-            height: 20px;
-            width: 20px;
+            height: 24px;
+            width: 24px;
             border-radius: 50%;
             background: #BF9447;
             cursor: pointer;
             border: 2px solid #000000;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            /* Better touch target for mobile */
+            -webkit-tap-highlight-color: transparent;
         }
         
         input[type="range"]::-webkit-slider-track {
             width: 100%;
-            height: 8px;
+            height: 10px;
             cursor: pointer;
             background: #e5e7eb;
-            border-radius: 4px;
+            border-radius: 5px;
             border: 1px solid #d1d5db;
         }
         
         /* Custom slider styling for Firefox */
         input[type="range"]::-moz-range-thumb {
-            height: 20px;
-            width: 20px;
+            height: 24px;
+            width: 24px;
             border-radius: 50%;
             background: #BF9447;
             cursor: pointer;
             border: 2px solid #000000;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            /* Remove default border */
+            border: none;
         }
         
         input[type="range"]::-moz-range-track {
             width: 100%;
-            height: 8px;
+            height: 10px;
             cursor: pointer;
             background: #e5e7eb;
-            border-radius: 4px;
+            border-radius: 5px;
             border: 1px solid #d1d5db;
         }
         
-        /* Focus styles for accessibility */
+        /* Focus styles for accessibility and mobile */
         input[type="range"]:focus {
             outline: none;
         }
@@ -77,31 +81,69 @@
         input[type="range"]:focus::-moz-range-thumb {
             box-shadow: 0 0 0 3px rgba(191, 148, 71, 0.3);
         }
+        
+        /* Improve touch targets for mobile buttons */
+        @media (max-width: 768px) {
+            button {
+                min-height: 44px; /* iOS recommended touch target size */
+                min-width: 44px;
+            }
+            
+            input[type="radio"] {
+                width: 18px;
+                height: 18px;
+            }
+            
+            input[type="number"], input[type="text"] {
+                min-height: 44px;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            /* Larger slider track for easier touch interaction */
+            input[type="range"]::-webkit-slider-track {
+                height: 12px;
+            }
+            
+            input[type="range"]::-moz-range-track {
+                height: 12px;
+            }
+            
+            /* Larger slider thumb for mobile */
+            input[type="range"]::-webkit-slider-thumb {
+                height: 28px;
+                width: 28px;
+            }
+            
+            input[type="range"]::-moz-range-thumb {
+                height: 28px;
+                width: 28px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Main Application Container -->
-    <div id="app" class="container mx-auto px-4 py-8">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-black mb-2">Canadian Mortgage Calculator</h1>
-            <p class="text-gray-600">Calculate your mortgage payments with Canadian regulations and CMHC insurance</p>
+    <div id="app" class="container mx-auto px-3 md:px-4 py-6 md:py-8">
+        <header class="text-center mb-6 md:mb-8">
+            <h1 class="text-2xl md:text-4xl font-bold text-black mb-2">Canadian Mortgage Calculator</h1>
+            <p class="text-sm md:text-base text-gray-600">Calculate your mortgage payments with Canadian regulations and CMHC insurance</p>
         </header>
         
         <!-- Main Content Area -->
         <main class="max-w-6xl mx-auto">
             <!-- Comparison Mode Toggle -->
-            <div class="mb-8 text-center">
-                <div class="inline-flex items-center bg-white rounded-lg shadow-lg p-2">
+            <div class="mb-6 md:mb-8 text-center">
+                <div class="inline-flex items-center bg-white rounded-lg shadow-lg p-1 md:p-2">
                     <button 
                         @click="comparisonMode = false"
-                        class="px-6 py-2 text-sm font-medium rounded-md transition-colors"
+                        class="px-4 md:px-6 py-2 text-sm font-medium rounded-md transition-colors"
                         :class="!comparisonMode ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
                     >
                         Single Scenario
                     </button>
                     <button 
                         @click="comparisonMode = true"
-                        class="px-6 py-2 text-sm font-medium rounded-md transition-colors"
+                        class="px-4 md:px-6 py-2 text-sm font-medium rounded-md transition-colors"
                         :class="comparisonMode ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
                     >
                         Compare Scenarios
@@ -109,10 +151,10 @@
                 </div>
             </div>
             
-            <div class="grid gap-8" :class="comparisonMode ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 lg:grid-cols-2'">
+            <div class="grid gap-4 md:gap-6 lg:gap-8" :class="comparisonMode ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1'">
                 <!-- Scenario 1 Input Controls Section -->
-                <section class="bg-white rounded-lg shadow-lg p-6" :class="comparisonMode ? 'mb-8' : ''">
-                    <h2 class="text-2xl font-semibold text-black mb-6">
+                <section class="bg-white rounded-lg shadow-lg p-4 md:p-6" :class="comparisonMode ? 'mb-4 md:mb-8' : ''">
+                    <h2 class="text-xl md:text-2xl font-semibold text-black mb-4 md:mb-6">
                         {{ comparisonMode ? 'Scenario 1: Mortgage Details' : 'Mortgage Details' }}
                     </h2>
                     
@@ -146,15 +188,33 @@
                                 <label class="block text-xs text-gray-600 mb-1">Or enter exact amount:</label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                                    <input 
-                                        type="number" 
-                                        v-model.number="homePrice"
-                                        :min="mortgageConfig.ranges.homePrice.min"
-                                        :max="mortgageConfig.ranges.homePrice.max"
-                                        :step="mortgageConfig.ranges.homePrice.step"
-                                        class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
-                                        placeholder="Enter home price"
-                                    />
+                                        <input 
+                                            type="number" 
+                                            v-model.number="homePrice"
+                                            :min="mortgageConfig.ranges.homePrice.min"
+                                            :max="mortgageConfig.ranges.homePrice.max"
+                                            :step="mortgageConfig.ranges.homePrice.step"
+                                            class="w-full pl-8 pr-4 py-3 md:py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold text-base md:text-sm"
+                                            :class="hasFieldErrors('homePrice') ? 'border-red-300 bg-red-50' : 'border-gray-300'"
+                                            placeholder="Enter home price"
+                                        />
+                                </div>
+                                
+                                <!-- Home Price Validation Messages -->
+                                <div v-if="getFieldValidationErrors('homePrice').length > 0" class="mt-2">
+                                    <div v-for="error in getFieldValidationErrors('homePrice')" :key="error.message" 
+                                         class="flex items-start p-2 rounded-md text-sm"
+                                         :class="error.severity === 'error' ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'">
+                                        <svg v-if="error.severity === 'error'" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <svg v-else class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div :class="error.severity === 'error' ? 'text-red-700' : 'text-yellow-700'">
+                                            {{ error.message }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -168,7 +228,7 @@
                             </div>
                             
                             <!-- Down Payment Input Controls -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
                                 <!-- Dollar Amount Input -->
                                 <div>
                                     <label class="block text-xs text-gray-600 mb-1">Dollar Amount</label>
@@ -180,11 +240,29 @@
                                             :min="0"
                                             :max="homePrice"
                                             :step="1000"
-                                            class="w-full pl-8 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
-                                            :class="isDownPaymentValid ? 'border-gray-300' : 'border-red-300 bg-red-50'"
+                                            class="w-full pl-8 pr-4 py-3 md:py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold text-base md:text-sm"
+                                            :class="hasFieldErrors('downPayment') || !isDownPaymentValid ? 'border-red-300 bg-red-50' : 'border-gray-300'"
                                             placeholder="Enter amount"
                                             @input="updateDownPaymentFromDollar"
                                         />
+                                    </div>
+                                    
+                                    <!-- Down Payment Dollar Amount Validation Messages -->
+                                    <div v-if="getFieldValidationErrors('downPayment').length > 0" class="mt-2">
+                                        <div v-for="error in getFieldValidationErrors('downPayment')" :key="error.message" 
+                                             class="flex items-start p-2 rounded-md text-sm bg-red-50 border border-red-200">
+                                            <svg class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <div class="text-red-700">
+                                                {{ error.message }}
+                                                <div v-if="error.field === 'downPayment'" class="text-xs mt-1 text-red-600">
+                                                    <span v-if="downPayment < 0">Down payment cannot be negative.</span>
+                                                    <span v-else-if="downPayment > homePrice">Down payment cannot exceed the home price of ${{ homePrice.toLocaleString() }}.</span>
+                                                    <span v-else-if="!isDownPaymentValid">Minimum required: ${{ minimumDownPayment.toLocaleString() }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -198,8 +276,8 @@
                                             :min="0"
                                             :max="100"
                                             :step="0.1"
-                                            class="w-full pl-4 pr-8 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
-                                            :class="isDownPaymentValid ? 'border-gray-300' : 'border-red-300 bg-red-50'"
+                                            class="w-full pl-4 pr-8 py-3 md:py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold text-base md:text-sm"
+                                            :class="hasFieldErrors('downPayment') || !isDownPaymentValid ? 'border-red-300 bg-red-50' : 'border-gray-300'"
                                             placeholder="Enter %"
                                             @input="updateDownPaymentFromPercent"
                                         />
@@ -216,7 +294,7 @@
                                         v-for="percent in [5, 10, 15, 20, 25]" 
                                         :key="percent"
                                         @click="setDownPaymentPercent(percent)"
-                                        class="px-3 py-1 text-sm border rounded-md transition-colors"
+                                        class="px-3 py-2 md:py-1 text-sm border rounded-md transition-colors min-h-[44px] md:min-h-[auto] touch-manipulation"
                                         :class="Math.abs(downPaymentPercent - percent) < 0.1 ? 'bg-gold text-white border-gold' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
                                     >
                                         {{ percent }}%
@@ -268,14 +346,14 @@
                                 <div class="flex bg-gray-100 rounded-lg p-1">
                                     <button 
                                         @click="rateType = 'fixed'"
-                                        class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                                        class="flex-1 px-3 md:px-4 py-3 md:py-2 text-sm font-medium rounded-md transition-colors min-h-[44px] touch-manipulation"
                                         :class="rateType === 'fixed' ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
                                     >
                                         Fixed Rate
                                     </button>
                                     <button 
                                         @click="rateType = 'variable'"
-                                        class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                                        class="flex-1 px-3 md:px-4 py-3 md:py-2 text-sm font-medium rounded-md transition-colors min-h-[44px] touch-manipulation"
                                         :class="rateType === 'variable' ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
                                     >
                                         Variable Rate
@@ -293,13 +371,31 @@
                                         :min="mortgageConfig.ranges.interestRate.min"
                                         :max="mortgageConfig.ranges.interestRate.max"
                                         :step="mortgageConfig.ranges.interestRate.step"
-                                        class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        class="w-full pl-4 pr-8 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        :class="hasFieldErrors('interestRate') ? 'border-red-300 bg-red-50' : 'border-gray-300'"
                                         placeholder="Enter rate"
                                     />
                                     <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
                                 </div>
                                 <div class="mt-1 text-xs text-gray-500">
                                     Enter the fixed interest rate for your mortgage term
+                                </div>
+                                
+                                <!-- Interest Rate Validation Messages -->
+                                <div v-if="getFieldValidationErrors('interestRate').length > 0" class="mt-2">
+                                    <div v-for="error in getFieldValidationErrors('interestRate')" :key="error.message" 
+                                         class="flex items-start p-2 rounded-md text-sm"
+                                         :class="error.severity === 'error' ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'">
+                                        <svg v-if="error.severity === 'error'" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <svg v-else class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div :class="error.severity === 'error' ? 'text-red-700' : 'text-yellow-700'">
+                                            {{ error.message }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -315,13 +411,36 @@
                                             :min="mortgageConfig.ranges.primeRate.min"
                                             :max="mortgageConfig.ranges.primeRate.max"
                                             :step="mortgageConfig.ranges.primeRate.step"
-                                            class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            class="w-full pl-4 pr-8 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            :class="hasFieldErrors('primeRate') ? 'border-red-300 bg-red-50' : 'border-gray-300'"
                                             placeholder="Enter prime rate"
                                         />
                                         <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
                                     </div>
                                     <div class="mt-1 text-xs text-gray-500">
                                         Current Bank of Canada prime rate
+                                    </div>
+                                    
+                                    <!-- Prime Rate Validation Messages -->
+                                    <div v-if="getFieldValidationErrors('primeRate').length > 0" class="mt-2">
+                                        <div v-for="error in getFieldValidationErrors('primeRate')" :key="error.message" 
+                                             class="flex items-start p-2 rounded-md text-sm"
+                                             :class="error.severity === 'error' ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'">
+                                            <svg v-if="error.severity === 'error'" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <svg v-else class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <div :class="error.severity === 'error' ? 'text-red-700' : 'text-yellow-700'">
+                                                {{ error.message }}
+                                                <div v-if="error.severity === 'error' && error.field === 'primeRate'" class="text-xs mt-1 text-red-600">
+                                                    <span v-if="primeRate <= 0">Prime rate must be a positive number.</span>
+                                                    <span v-else-if="primeRate < mortgageConfig.ranges.primeRate.min">Try a rate of {{ mortgageConfig.ranges.primeRate.min }}% or higher.</span>
+                                                    <span v-else-if="primeRate > mortgageConfig.ranges.primeRate.max">Prime rates above {{ mortgageConfig.ranges.primeRate.max }}% are extremely high.</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -335,13 +454,37 @@
                                             :min="mortgageConfig.ranges.variableDiscount.min"
                                             :max="mortgageConfig.ranges.variableDiscount.max"
                                             :step="mortgageConfig.ranges.variableDiscount.step"
-                                            class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            class="w-full pl-4 pr-8 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                            :class="hasFieldErrors('variableDiscount') ? 'border-red-300 bg-red-50' : 'border-gray-300'"
                                             placeholder="Enter discount"
                                         />
                                         <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
                                     </div>
                                     <div class="mt-1 text-xs text-gray-500">
                                         Discount off prime rate (e.g., Prime - 0.5%)
+                                    </div>
+                                    
+                                    <!-- Variable Discount Validation Messages -->
+                                    <div v-if="getFieldValidationErrors('variableDiscount').length > 0" class="mt-2">
+                                        <div v-for="error in getFieldValidationErrors('variableDiscount')" :key="error.message" 
+                                             class="flex items-start p-2 rounded-md text-sm"
+                                             :class="error.severity === 'error' ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'">
+                                            <svg v-if="error.severity === 'error'" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <svg v-else class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <div :class="error.severity === 'error' ? 'text-red-700' : 'text-yellow-700'">
+                                                {{ error.message }}
+                                                <div v-if="error.severity === 'error' && error.field === 'variableDiscount'" class="text-xs mt-1 text-red-600">
+                                                    <span v-if="variableDiscount < mortgageConfig.ranges.variableDiscount.min">Discount must be at least {{ mortgageConfig.ranges.variableDiscount.min }}%.</span>
+                                                    <span v-else-if="variableDiscount > mortgageConfig.ranges.variableDiscount.max">Discount cannot exceed {{ mortgageConfig.ranges.variableDiscount.max }}%.</span>
+                                                    <span v-else-if="variableDiscount >= primeRate">Discount cannot be greater than the prime rate ({{ primeRate.toFixed(2) }}%).</span>
+                                                    <span v-else-if="(primeRate - variableDiscount) <= 0">This would result in a negative interest rate.</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -379,12 +522,12 @@
                             <!-- Amortization Period Button Selector -->
                             <div class="mb-4">
                                 <label class="block text-xs text-gray-600 mb-2">Select Period:</label>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     <button 
                                         v-for="period in mortgageConfig.amortizationPeriods" 
                                         :key="period"
                                         @click="amortizationYears = period"
-                                        class="px-4 py-2 text-sm font-medium border rounded-md transition-colors"
+                                        class="px-3 md:px-4 py-3 md:py-2 text-sm font-medium border rounded-md transition-colors min-h-[44px] touch-manipulation"
                                         :class="amortizationYears === period ? 'bg-gold text-white border-gold shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'"
                                     >
                                         {{ period }} years
@@ -402,13 +545,35 @@
                                         :min="5"
                                         :max="30"
                                         :step="1"
-                                        class="w-full pl-4 pr-16 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        class="w-full pl-4 pr-16 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        :class="hasFieldErrors('amortizationYears') ? 'border-red-300 bg-red-50' : 'border-gray-300'"
                                         placeholder="Enter years"
                                     />
                                     <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
                                 </div>
                                 <div class="mt-1 text-xs text-gray-500">
                                     Maximum 30 years for Canadian mortgages
+                                </div>
+                                
+                                <!-- Amortization Period Validation Messages -->
+                                <div v-if="getFieldValidationErrors('amortizationYears').length > 0" class="mt-2">
+                                    <div v-for="error in getFieldValidationErrors('amortizationYears')" :key="error.message" 
+                                         class="flex items-start p-2 rounded-md text-sm"
+                                         :class="error.severity === 'error' ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'">
+                                        <svg v-if="error.severity === 'error'" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <svg v-else class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div :class="error.severity === 'error' ? 'text-red-700' : 'text-yellow-700'">
+                                            {{ error.message }}
+                                            <div v-if="error.severity === 'error' && error.field === 'amortizationYears'" class="text-xs mt-1 text-red-600">
+                                                <span v-if="amortizationYears <= 0 || amortizationYears < 5">Try entering a value between 5 and 30 years.</span>
+                                                <span v-else-if="amortizationYears > 30">Canadian regulations limit amortization to 30 years maximum.</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -422,12 +587,12 @@
                             <!-- Interest Term Button Selector -->
                             <div class="mb-4">
                                 <label class="block text-xs text-gray-600 mb-2">Select Term:</label>
-                                <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                     <button 
                                         v-for="term in mortgageConfig.interestTerms" 
                                         :key="term"
                                         @click="interestTerm = term"
-                                        class="px-3 py-2 text-sm font-medium border rounded-md transition-colors"
+                                        class="px-2 md:px-3 py-3 md:py-2 text-sm font-medium border rounded-md transition-colors min-h-[44px] touch-manipulation"
                                         :class="interestTerm === term ? 'bg-gold text-white border-gold shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'"
                                     >
                                         {{ term }} {{ term === 1 ? 'yr' : 'yrs' }}
@@ -445,13 +610,35 @@
                                         :min="1"
                                         :max="amortizationYears"
                                         :step="1"
-                                        class="w-full pl-4 pr-16 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        class="w-full pl-4 pr-16 py-2 border rounded-md focus:ring-2 focus:ring-gold focus:border-gold"
+                                        :class="hasFieldErrors('interestTerm') ? 'border-red-300 bg-red-50' : 'border-gray-300'"
                                         placeholder="Enter years"
                                     />
                                     <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
                                 </div>
                                 <div class="mt-1 text-xs text-gray-500">
                                     Cannot exceed amortization period ({{ amortizationYears }} years)
+                                </div>
+                                
+                                <!-- Interest Term Validation Messages -->
+                                <div v-if="getFieldValidationErrors('interestTerm').length > 0" class="mt-2">
+                                    <div v-for="error in getFieldValidationErrors('interestTerm')" :key="error.message" 
+                                         class="flex items-start p-2 rounded-md text-sm"
+                                         :class="error.severity === 'error' ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'">
+                                        <svg v-if="error.severity === 'error'" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <svg v-else class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <div :class="error.severity === 'error' ? 'text-red-700' : 'text-yellow-700'">
+                                            {{ error.message }}
+                                            <div v-if="error.severity === 'error' && error.field === 'interestTerm'" class="text-xs mt-1 text-red-600">
+                                                <span v-if="interestTerm <= 0">Interest term must be at least 1 year.</span>
+                                                <span v-else-if="interestTerm > amortizationYears">Try a term of {{ amortizationYears }} years or less.</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -476,11 +663,11 @@
                                             :id="'frequency-' + key"
                                             :value="key"
                                             v-model="paymentFrequency"
-                                            class="w-4 h-4 text-gold bg-gray-100 border-gray-300 focus:ring-gold focus:ring-2"
+                                            class="w-5 h-5 md:w-4 md:h-4 text-gold bg-gray-100 border-gray-300 focus:ring-gold focus:ring-2"
                                         />
                                         <label 
                                             :for="'frequency-' + key" 
-                                            class="ml-2 text-sm font-medium text-gray-900 cursor-pointer"
+                                            class="ml-3 md:ml-2 text-sm font-medium text-gray-900 cursor-pointer py-2 md:py-0"
                                         >
                                             {{ frequency.label }}
                                             <span class="text-gray-500 text-xs ml-1">({{ frequency.value }} payments/year)</span>
@@ -516,8 +703,8 @@
                 </section>
                 
                 <!-- Scenario 2 Input Controls Section (only shown in comparison mode) -->
-                <section v-if="comparisonMode" class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                    <h2 class="text-2xl font-semibold text-black mb-6">Scenario 2: Mortgage Details</h2>
+                <section v-if="comparisonMode" class="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-4 md:mb-8">
+                    <h2 class="text-xl md:text-2xl font-semibold text-black mb-4 md:mb-6">Scenario 2: Mortgage Details</h2>
                     
                     <!-- Mortgage Amount Slider -->
                     <div class="space-y-6">
@@ -570,7 +757,7 @@
                             </div>
                             
                             <!-- Down Payment Input Controls -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
                                 <!-- Dollar Amount Input -->
                                 <div>
                                     <label class="block text-xs text-gray-600 mb-1">Dollar Amount</label>
@@ -618,7 +805,7 @@
                                         v-for="percent in [5, 10, 15, 20, 25]" 
                                         :key="percent"
                                         @click="setDownPaymentPercent2(percent)"
-                                        class="px-3 py-1 text-sm border rounded-md transition-colors"
+                                        class="px-3 py-2 md:py-1 text-sm border rounded-md transition-colors min-h-[44px] md:min-h-[auto] touch-manipulation"
                                         :class="Math.abs(downPaymentPercent2 - percent) < 0.1 ? 'bg-gold text-white border-gold' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
                                     >
                                         {{ percent }}%
@@ -670,14 +857,14 @@
                                 <div class="flex bg-gray-100 rounded-lg p-1">
                                     <button 
                                         @click="scenario2.rateType = 'fixed'"
-                                        class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                                        class="flex-1 px-3 md:px-4 py-3 md:py-2 text-sm font-medium rounded-md transition-colors min-h-[44px] touch-manipulation"
                                         :class="scenario2.rateType === 'fixed' ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
                                     >
                                         Fixed Rate
                                     </button>
                                     <button 
                                         @click="scenario2.rateType = 'variable'"
-                                        class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                                        class="flex-1 px-3 md:px-4 py-3 md:py-2 text-sm font-medium rounded-md transition-colors min-h-[44px] touch-manipulation"
                                         :class="scenario2.rateType === 'variable' ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
                                     >
                                         Variable Rate
@@ -781,12 +968,12 @@
                             <!-- Amortization Period Button Selector -->
                             <div class="mb-4">
                                 <label class="block text-xs text-gray-600 mb-2">Select Period:</label>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     <button 
                                         v-for="period in mortgageConfig.amortizationPeriods" 
                                         :key="period"
                                         @click="scenario2.amortizationYears = period"
-                                        class="px-4 py-2 text-sm font-medium border rounded-md transition-colors"
+                                        class="px-3 md:px-4 py-3 md:py-2 text-sm font-medium border rounded-md transition-colors min-h-[44px] touch-manipulation"
                                         :class="scenario2.amortizationYears === period ? 'bg-gold text-white border-gold shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'"
                                     >
                                         {{ period }} years
@@ -824,12 +1011,12 @@
                             <!-- Interest Term Button Selector -->
                             <div class="mb-4">
                                 <label class="block text-xs text-gray-600 mb-2">Select Term:</label>
-                                <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                     <button 
                                         v-for="term in mortgageConfig.interestTerms" 
                                         :key="term"
                                         @click="scenario2.interestTerm = term"
-                                        class="px-3 py-2 text-sm font-medium border rounded-md transition-colors"
+                                        class="px-2 md:px-3 py-3 md:py-2 text-sm font-medium border rounded-md transition-colors min-h-[44px] touch-manipulation"
                                         :class="scenario2.interestTerm === term ? 'bg-gold text-white border-gold shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'"
                                     >
                                         {{ term }} {{ term === 1 ? 'yr' : 'yrs' }}
@@ -918,15 +1105,250 @@
                 </section>
                 
                 <!-- Results Section -->
-                <section class="space-y-6">
-                    <!-- Payment Summary Card -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-2xl font-semibold text-black mb-6 flex items-center">
-                            <svg class="w-6 h-6 text-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                            Payment Summary
-                        </h2>
+                <section class="space-y-4 md:space-y-6">
+                    <!-- Comparison Results (when comparison mode is active) -->
+                    <div v-if="comparisonMode" class="space-y-4 md:space-y-6">
+                        <!-- Comparison Summary Header -->
+                        <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
+                            <h2 class="text-xl md:text-2xl font-semibold text-black mb-4 md:mb-6 flex items-center">
+                                <svg class="w-6 h-6 text-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Scenario Comparison
+                            </h2>
+                            
+                            <!-- Total Cost Difference Highlight -->
+                            <div v-if="isCalculationValid && isCalculationValid2" class="p-4 md:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 mb-4 md:mb-6">
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-600 mb-2">Total Cost Difference Over {{ Math.max(amortizationYears, scenario2.amortizationYears) }} Years</div>
+                                    <div class="text-3xl font-bold mb-2" :class="totalCostDifference >= 0 ? 'text-red-600' : 'text-green-600'">
+                                        {{ totalCostDifference >= 0 ? '+' : '' }}${{ Math.abs(Math.round(totalCostDifference)).toLocaleString() }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ totalCostDifference >= 0 ? 'Scenario 1 costs more' : 'Scenario 2 costs more' }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Comparison Metrics -->
+                            <div v-if="isCalculationValid && isCalculationValid2" class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-1">Payment Difference</div>
+                                    <div class="text-lg font-bold" :class="paymentDifference >= 0 ? 'text-red-600' : 'text-green-600'">
+                                        {{ paymentDifference >= 0 ? '+' : '' }}${{ Math.abs(Math.round(paymentDifference)).toLocaleString() }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">Monthly equivalent</div>
+                                </div>
+                                
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-1">Interest Difference</div>
+                                    <div class="text-lg font-bold" :class="interestDifference >= 0 ? 'text-red-600' : 'text-green-600'">
+                                        {{ interestDifference >= 0 ? '+' : '' }}${{ Math.abs(Math.round(interestDifference)).toLocaleString() }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">Total over life</div>
+                                </div>
+                                
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-1">Rate Difference</div>
+                                    <div class="text-lg font-bold" :class="rateDifference >= 0 ? 'text-red-600' : 'text-green-600'">
+                                        {{ rateDifference >= 0 ? '+' : '' }}{{ rateDifference.toFixed(2) }}%
+                                    </div>
+                                    <div class="text-xs text-gray-500">Effective rate</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Side-by-Side Payment Comparison -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                            <!-- Scenario 1 Payment Summary -->
+                            <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
+                                <h3 class="text-lg md:text-xl font-semibold text-black mb-4 flex items-center">
+                                    <span class="w-6 h-6 bg-gold text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">1</span>
+                                    Scenario 1 Payment Summary
+                                </h3>
+                                
+                                <div v-if="!isCalculationValid" class="p-4 bg-red-50 border border-red-200 rounded-md">
+                                    <div class="text-red-700 text-sm text-center">Please correct input errors to see calculations</div>
+                                </div>
+                                
+                                <div v-else class="space-y-4">
+                                    <!-- Primary Payment Display -->
+                                    <div class="text-center p-4 bg-gradient-to-r from-gold/10 to-gold/5 rounded-lg border border-gold/20">
+                                        <div class="text-sm text-gray-600 mb-1">{{ mortgageConfig.paymentFrequencies[paymentFrequency].label }} Payment</div>
+                                        <div class="text-2xl font-bold text-gold">${{ Math.round(actualPayment).toLocaleString() }}</div>
+                                        <div class="text-xs text-gray-500">Monthly: ${{ Math.round(monthlyPayment).toLocaleString() }}</div>
+                                    </div>
+                                    
+                                    <!-- Key Metrics -->
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Mortgage Amount</span>
+                                            <span class="font-semibold">${{ mortgageAmount.toLocaleString() }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Interest Rate</span>
+                                            <span class="font-semibold">{{ displayInterestRate }}% {{ rateType === 'variable' ? '(Variable)' : '(Fixed)' }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Amortization</span>
+                                            <span class="font-semibold">{{ amortizationYears }} years</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Total Interest</span>
+                                            <span class="font-semibold">${{ Math.round(totalInterest).toLocaleString() }}</span>
+                                        </div>
+                                        <div class="flex justify-between border-t pt-2">
+                                            <span class="text-gray-900 font-medium">Total Cost</span>
+                                            <span class="font-bold text-gold">${{ Math.round(mortgageAmount + totalInterest).toLocaleString() }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scenario 2 Payment Summary -->
+                            <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
+                                <h3 class="text-lg md:text-xl font-semibold text-black mb-4 flex items-center">
+                                    <span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">2</span>
+                                    Scenario 2 Payment Summary
+                                </h3>
+                                
+                                <div v-if="!isCalculationValid2" class="p-4 bg-red-50 border border-red-200 rounded-md">
+                                    <div class="text-red-700 text-sm text-center">Please correct input errors to see calculations</div>
+                                </div>
+                                
+                                <div v-else class="space-y-4">
+                                    <!-- Primary Payment Display -->
+                                    <div class="text-center p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border border-amber-200">
+                                        <div class="text-sm text-gray-600 mb-1">{{ mortgageConfig.paymentFrequencies[scenario2.paymentFrequency].label }} Payment</div>
+                                        <div class="text-2xl font-bold text-amber-600">${{ Math.round(actualPayment2).toLocaleString() }}</div>
+                                        <div class="text-xs text-gray-500">Monthly: ${{ Math.round(monthlyPayment2).toLocaleString() }}</div>
+                                    </div>
+                                    
+                                    <!-- Key Metrics -->
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Mortgage Amount</span>
+                                            <span class="font-semibold">${{ mortgageAmount2.toLocaleString() }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Interest Rate</span>
+                                            <span class="font-semibold">{{ displayInterestRate2 }}% {{ scenario2.rateType === 'variable' ? '(Variable)' : '(Fixed)' }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Amortization</span>
+                                            <span class="font-semibold">{{ scenario2.amortizationYears }} years</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Total Interest</span>
+                                            <span class="font-semibold">${{ Math.round(totalInterest2).toLocaleString() }}</span>
+                                        </div>
+                                        <div class="flex justify-between border-t pt-2">
+                                            <span class="text-gray-900 font-medium">Total Cost</span>
+                                            <span class="font-bold text-amber-600">${{ Math.round(mortgageAmount2 + totalInterest2).toLocaleString() }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Side-by-Side CMHC Insurance Comparison -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                            <!-- Scenario 1 CMHC Insurance -->
+                            <div class="bg-white rounded-lg shadow-lg p-6">
+                                <h3 class="text-xl font-semibold text-black mb-4 flex items-center">
+                                    <span class="w-6 h-6 bg-gold text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">1</span>
+                                    CMHC Insurance
+                                </h3>
+                                
+                                <div v-if="!isCalculationValid" class="p-4 bg-gray-50 border border-gray-200 rounded-md">
+                                    <div class="text-gray-600 text-center text-sm">Complete mortgage details to see insurance information</div>
+                                </div>
+                                
+                                <div v-else-if="cmhcInsurance === 0" class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-green-700 font-medium mb-1">No Insurance Required</div>
+                                        <div class="text-green-600 text-sm">{{ downPaymentPercent.toFixed(1) }}% down payment</div>
+                                    </div>
+                                </div>
+                                
+                                <div v-else class="space-y-3">
+                                    <div class="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
+                                        <div class="text-orange-700 font-medium mb-1">Insurance Required</div>
+                                        <div class="text-2xl font-bold text-red-600">${{ Math.round(cmhcInsurance).toLocaleString() }}</div>
+                                        <div class="text-sm text-gray-500">{{ cmhcRate }}% premium</div>
+                                    </div>
+                                    
+                                    <div class="text-sm space-y-2">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Base Mortgage</span>
+                                            <span class="font-semibold">${{ baseMortgageAmount.toLocaleString() }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Insurance Premium</span>
+                                            <span class="font-semibold text-red-600">+${{ Math.round(cmhcInsurance).toLocaleString() }}</span>
+                                        </div>
+                                        <div class="flex justify-between border-t pt-2">
+                                            <span class="text-gray-900 font-medium">Total Mortgage</span>
+                                            <span class="font-bold">${{ mortgageAmount.toLocaleString() }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scenario 2 CMHC Insurance -->
+                            <div class="bg-white rounded-lg shadow-lg p-6">
+                                <h3 class="text-xl font-semibold text-black mb-4 flex items-center">
+                                    <span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">2</span>
+                                    CMHC Insurance
+                                </h3>
+                                
+                                <div v-if="!isCalculationValid2" class="p-4 bg-gray-50 border border-gray-200 rounded-md">
+                                    <div class="text-gray-600 text-center text-sm">Complete mortgage details to see insurance information</div>
+                                </div>
+                                
+                                <div v-else-if="cmhcInsurance2 === 0" class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-green-700 font-medium mb-1">No Insurance Required</div>
+                                        <div class="text-green-600 text-sm">{{ downPaymentPercent2.toFixed(1) }}% down payment</div>
+                                    </div>
+                                </div>
+                                
+                                <div v-else class="space-y-3">
+                                    <div class="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
+                                        <div class="text-orange-700 font-medium mb-1">Insurance Required</div>
+                                        <div class="text-2xl font-bold text-red-600">${{ Math.round(cmhcInsurance2).toLocaleString() }}</div>
+                                        <div class="text-sm text-gray-500">{{ cmhcRate2 }}% premium</div>
+                                    </div>
+                                    
+                                    <div class="text-sm space-y-2">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Base Mortgage</span>
+                                            <span class="font-semibold">${{ baseMortgageAmount2.toLocaleString() }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Insurance Premium</span>
+                                            <span class="font-semibold text-red-600">+${{ Math.round(cmhcInsurance2).toLocaleString() }}</span>
+                                        </div>
+                                        <div class="flex justify-between border-t pt-2">
+                                            <span class="text-gray-900 font-medium">Total Mortgage</span>
+                                            <span class="font-bold">${{ mortgageAmount2.toLocaleString() }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Single Scenario Results (when comparison mode is not active) -->
+                    <div v-else>
+                        <!-- Payment Summary Card -->
+                        <div class="bg-white rounded-lg shadow-lg p-6">
+                            <h2 class="text-2xl font-semibold text-black mb-6 flex items-center">
+                                <svg class="w-6 h-6 text-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                                Payment Summary
+                            </h2>
                         
                         <div v-if="!isCalculationValid" class="p-4 bg-red-50 border border-red-200 rounded-md mb-6">
                             <div class="flex items-start">
@@ -951,7 +1373,7 @@
                             </div>
                             
                             <!-- Key Financial Metrics -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                                 <div class="p-4 bg-gray-50 rounded-lg">
                                     <div class="text-sm text-gray-600 mb-1">Total Interest Paid</div>
                                     <div class="text-2xl font-bold text-black">${{ Math.round(totalInterest).toLocaleString() }}</div>
@@ -1140,28 +1562,28 @@
                             <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                                 <div class="text-center mb-4">
                                     <div class="text-sm text-gray-600 mb-1">Mortgage Balance Remaining</div>
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
+                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-3">
                                         <div class="text-center">
                                             <div class="text-xs text-gray-500">After 1 year</div>
-                                            <div class="text-lg font-bold text-blue-700">
+                                            <div class="text-lg font-bold text-gold">
                                                 ${{ Math.round(mortgageBalanceAfterPayments(mortgageConfig.paymentFrequencies[paymentFrequency].value)).toLocaleString() }}
                                             </div>
                                         </div>
                                         <div class="text-center">
                                             <div class="text-xs text-gray-500">After 5 years</div>
-                                            <div class="text-lg font-bold text-blue-700">
+                                            <div class="text-lg font-bold text-gold">
                                                 ${{ Math.round(mortgageBalanceAfterPayments(5 * mortgageConfig.paymentFrequencies[paymentFrequency].value)).toLocaleString() }}
                                             </div>
                                         </div>
                                         <div class="text-center">
                                             <div class="text-xs text-gray-500">After 10 years</div>
-                                            <div class="text-lg font-bold text-blue-700">
+                                            <div class="text-lg font-bold text-gold">
                                                 ${{ Math.round(mortgageBalanceAfterPayments(10 * mortgageConfig.paymentFrequencies[paymentFrequency].value)).toLocaleString() }}
                                             </div>
                                         </div>
                                         <div class="text-center">
                                             <div class="text-xs text-gray-500">After {{ Math.min(15, amortizationYears) }} years</div>
-                                            <div class="text-lg font-bold text-blue-700">
+                                            <div class="text-lg font-bold text-gold">
                                                 ${{ Math.round(mortgageBalanceAfterPayments(Math.min(15, amortizationYears) * mortgageConfig.paymentFrequencies[paymentFrequency].value)).toLocaleString() }}
                                             </div>
                                         </div>
@@ -1199,7 +1621,7 @@
                                 <!-- Summary of First Year -->
                                 <div class="mt-4 p-3 bg-gray-50 rounded-md">
                                     <div class="text-sm text-gray-600 mb-2 font-medium">First Year Summary:</div>
-                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 text-sm">
                                         <div>
                                             <div class="text-gray-500">Total Payments</div>
                                             <div class="font-semibold text-black">
@@ -1222,6 +1644,7 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
                     </div>
                 </section>
             </div>
@@ -1524,14 +1947,14 @@
                  * Check if all inputs are valid for calculation
                  */
                 isCalculationValid() {
-                    return this.inputValidation.isValid;
+                    return this.getEnhancedInputValidation().isValid;
                 },
 
                 /**
                  * Get all validation errors
                  */
                 validationErrors() {
-                    return this.inputValidation.errors;
+                    return this.getEnhancedInputValidation().errors;
                 },
 
                 /**
@@ -1606,6 +2029,389 @@
                     }
                     
                     return breakdown;
+                },
+
+                // ===== SCENARIO 2 COMPUTED PROPERTIES =====
+
+                /**
+                 * Calculate the effective interest rate being used for scenario 2
+                 */
+                effectiveInterestRate2() {
+                    const rate = this.scenario2.rateType === 'variable' 
+                        ? (this.primeRate - this.scenario2.variableDiscount) / 100
+                        : this.scenario2.interestRate / 100;
+                    
+                    return this.calculateEffectiveAnnualRate(rate);
+                },
+
+                /**
+                 * Calculate the periodic interest rate for scenario 2
+                 */
+                periodicInterestRate2() {
+                    const paymentsPerYear = this.getPaymentFrequency(this.scenario2.paymentFrequency);
+                    return this.calculatePeriodicRate(this.effectiveInterestRate2, paymentsPerYear);
+                },
+
+                /**
+                 * Calculate the mortgage amount (home price minus down payment) for scenario 2
+                 */
+                baseMortgageAmount2() {
+                    return Math.max(0, this.scenario2.homePrice - this.scenario2.downPayment);
+                },
+
+                /**
+                 * Calculate CMHC insurance premium for scenario 2
+                 */
+                cmhcInsurance2() {
+                    if (!this.isDownPaymentValid2) return 0;
+                    return this.calculateCMHCInsurance(this.scenario2.homePrice, this.scenario2.downPayment);
+                },
+
+                /**
+                 * Calculate total mortgage amount including CMHC insurance for scenario 2
+                 */
+                mortgageAmount2() {
+                    if (!this.isDownPaymentValid2) return 0;
+                    return this.calculateTotalMortgageAmount(this.scenario2.homePrice, this.scenario2.downPayment);
+                },
+
+                /**
+                 * Get CMHC insurance rate percentage for scenario 2
+                 */
+                cmhcRate2() {
+                    const downPaymentPercent = (this.scenario2.downPayment / this.scenario2.homePrice) * 100;
+                    return this.getCMHCRate(downPaymentPercent);
+                },
+
+                /**
+                 * Calculate total number of payments for scenario 2
+                 */
+                totalPayments2() {
+                    const paymentsPerYear = this.getPaymentFrequency(this.scenario2.paymentFrequency);
+                    return this.calculateTotalPayments(this.scenario2.amortizationYears, paymentsPerYear);
+                },
+
+                /**
+                 * Calculate monthly payment amount for scenario 2
+                 */
+                monthlyPayment2() {
+                    if (!this.isCalculationValid2 || this.mortgageAmount2 <= 0) return 0;
+                    
+                    const payment = this.calculateMortgagePayment(
+                        this.mortgageAmount2,
+                        this.periodicInterestRate2,
+                        this.totalPayments2
+                    );
+                    
+                    // Convert to monthly equivalent if not monthly frequency
+                    const paymentsPerYear = this.getPaymentFrequency(this.scenario2.paymentFrequency);
+                    if (paymentsPerYear !== 12) {
+                        return (payment * paymentsPerYear) / 12;
+                    }
+                    
+                    return payment;
+                },
+
+                /**
+                 * Calculate actual payment amount for selected frequency for scenario 2
+                 */
+                actualPayment2() {
+                    if (!this.isCalculationValid2 || this.mortgageAmount2 <= 0) return 0;
+                    
+                    return this.calculateMortgagePayment(
+                        this.mortgageAmount2,
+                        this.periodicInterestRate2,
+                        this.totalPayments2
+                    );
+                },
+
+                /**
+                 * Calculate total interest paid over the life of the mortgage for scenario 2
+                 */
+                totalInterest2() {
+                    if (!this.isCalculationValid2 || this.mortgageAmount2 <= 0) return 0;
+                    
+                    const payment = this.calculateMortgagePayment(
+                        this.mortgageAmount2,
+                        this.periodicInterestRate2,
+                        this.totalPayments2
+                    );
+                    
+                    const totalPaid = payment * this.totalPayments2;
+                    return totalPaid - this.mortgageAmount2;
+                },
+
+                /**
+                 * Get minimum down payment required for current home price for scenario 2
+                 */
+                minimumDownPayment2() {
+                    return this.calculateMinimumDownPayment(this.scenario2.homePrice);
+                },
+
+                /**
+                 * Get current down payment validation status for scenario 2
+                 */
+                downPaymentValidation2() {
+                    return this.validateDownPayment(this.scenario2.homePrice, this.scenario2.downPayment);
+                },
+
+                /**
+                 * Check if current down payment is valid for scenario 2
+                 */
+                isDownPaymentValid2() {
+                    return this.downPaymentValidation2.isValid;
+                },
+
+                /**
+                 * Get down payment error message if invalid for scenario 2
+                 */
+                downPaymentErrorMessage2() {
+                    return this.downPaymentValidation2.errorMessage;
+                },
+
+                /**
+                 * Calculate down payment as percentage of home price for scenario 2
+                 */
+                downPaymentPercent2() {
+                    if (this.scenario2.homePrice <= 0) return 0;
+                    return (this.scenario2.downPayment / this.scenario2.homePrice) * 100;
+                },
+
+                /**
+                 * Calculate minimum down payment as percentage of home price for scenario 2
+                 */
+                minimumDownPaymentPercent2() {
+                    if (this.scenario2.homePrice <= 0) return 0;
+                    return (this.minimumDownPayment2 / this.scenario2.homePrice) * 100;
+                },
+
+                /**
+                 * Validate all input values for calculation for scenario 2
+                 */
+                inputValidation2() {
+                    const errors = [];
+                    
+                    // Validate home price
+                    if (this.scenario2.homePrice <= 0) {
+                        errors.push({ field: 'homePrice', message: 'Home price must be greater than zero.' });
+                    } else if (this.scenario2.homePrice < this.mortgageConfig.ranges.homePrice.min) {
+                        errors.push({ field: 'homePrice', message: `Home price must be at least ${this.mortgageConfig.ranges.homePrice.min.toLocaleString()}.` });
+                    } else if (this.scenario2.homePrice > this.mortgageConfig.ranges.homePrice.max) {
+                        errors.push({ field: 'homePrice', message: `Home price cannot exceed ${this.mortgageConfig.ranges.homePrice.max.toLocaleString()}.` });
+                    }
+                    
+                    // Validate interest rate
+                    const currentRate = this.scenario2.rateType === 'variable' 
+                        ? (this.primeRate - this.scenario2.variableDiscount)
+                        : this.scenario2.interestRate;
+                        
+                    if (currentRate <= 0) {
+                        errors.push({ field: 'interestRate', message: 'Interest rate must be greater than zero.' });
+                    } else if (currentRate > 15) {
+                        errors.push({ field: 'interestRate', message: 'Interest rate cannot exceed 15%.' });
+                    }
+                    
+                    // Validate amortization period
+                    if (this.scenario2.amortizationYears <= 0) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be greater than zero.' });
+                    } else if (this.scenario2.amortizationYears > 30) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period cannot exceed 30 years in Canada.' });
+                    }
+                    
+                    // Validate interest term
+                    if (this.scenario2.interestTerm <= 0) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term must be greater than zero.' });
+                    } else if (this.scenario2.interestTerm > this.scenario2.amortizationYears) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term cannot exceed amortization period.' });
+                    }
+                    
+                    // Add down payment validation
+                    if (!this.isDownPaymentValid2) {
+                        errors.push({ field: 'downPayment', message: this.downPaymentErrorMessage2 });
+                    }
+                    
+                    return {
+                        isValid: errors.length === 0,
+                        errors: errors
+                    };
+                },
+
+                /**
+                 * Check if all inputs are valid for calculation for scenario 2
+                 */
+                isCalculationValid2() {
+                    return this.getEnhancedInputValidation2().isValid;
+                },
+
+                /**
+                 * Get all validation errors for scenario 2
+                 */
+                validationErrors2() {
+                    return this.getEnhancedInputValidation2().errors;
+                },
+
+                /**
+                 * Enhanced input validation for scenario 2 with comprehensive range checking
+                 * @returns {Object} Validation result with detailed error information
+                 */
+                getEnhancedInputValidation2() {
+                    const errors = [];
+                    
+                    // Validate home price
+                    if (this.scenario2.homePrice === null || this.scenario2.homePrice === undefined || isNaN(this.scenario2.homePrice)) {
+                        errors.push({ field: 'homePrice', message: 'Home price must be a valid number.', severity: 'error' });
+                    } else if (this.scenario2.homePrice <= 0) {
+                        errors.push({ field: 'homePrice', message: 'Home price must be greater than zero.', severity: 'error' });
+                    } else if (this.scenario2.homePrice < this.mortgageConfig.ranges.homePrice.min) {
+                        errors.push({ field: 'homePrice', message: `Home price must be at least $${this.mortgageConfig.ranges.homePrice.min.toLocaleString()}.`, severity: 'error' });
+                    } else if (this.scenario2.homePrice > this.mortgageConfig.ranges.homePrice.max) {
+                        errors.push({ field: 'homePrice', message: `Home price cannot exceed $${this.mortgageConfig.ranges.homePrice.max.toLocaleString()}.`, severity: 'error' });
+                    } else if (this.scenario2.homePrice % this.mortgageConfig.ranges.homePrice.step !== 0) {
+                        errors.push({ field: 'homePrice', message: `Home price should be in increments of $${this.mortgageConfig.ranges.homePrice.step.toLocaleString()}.`, severity: 'warning' });
+                    }
+                    
+                    // Validate down payment
+                    if (this.scenario2.downPayment === null || this.scenario2.downPayment === undefined || isNaN(this.scenario2.downPayment)) {
+                        errors.push({ field: 'downPayment', message: 'Down payment must be a valid number.', severity: 'error' });
+                    } else if (this.scenario2.downPayment < 0) {
+                        errors.push({ field: 'downPayment', message: 'Down payment cannot be negative.', severity: 'error' });
+                    } else if (this.scenario2.downPayment > this.scenario2.homePrice) {
+                        errors.push({ field: 'downPayment', message: 'Down payment cannot exceed home price.', severity: 'error' });
+                    } else if (!this.isDownPaymentValid2) {
+                        errors.push({ field: 'downPayment', message: this.downPaymentErrorMessage2, severity: 'error' });
+                    }
+                    
+                    // Validate interest rate (fixed rate)
+                    if (this.scenario2.rateType === 'fixed') {
+                        if (this.scenario2.interestRate === null || this.scenario2.interestRate === undefined || isNaN(this.scenario2.interestRate)) {
+                            errors.push({ field: 'interestRate', message: 'Interest rate must be a valid number.', severity: 'error' });
+                        } else if (this.scenario2.interestRate <= 0) {
+                            errors.push({ field: 'interestRate', message: 'Interest rate must be greater than zero.', severity: 'error' });
+                        } else if (this.scenario2.interestRate < this.mortgageConfig.ranges.interestRate.min) {
+                            errors.push({ field: 'interestRate', message: `Interest rate must be at least ${this.mortgageConfig.ranges.interestRate.min}%.`, severity: 'error' });
+                        } else if (this.scenario2.interestRate > this.mortgageConfig.ranges.interestRate.max) {
+                            errors.push({ field: 'interestRate', message: `Interest rate cannot exceed ${this.mortgageConfig.ranges.interestRate.max}%.`, severity: 'error' });
+                        } else if (this.scenario2.interestRate > 10) {
+                            errors.push({ field: 'interestRate', message: 'Interest rate above 10% is unusually high. Please verify this rate.', severity: 'warning' });
+                        }
+                    }
+                    
+                    // Validate prime rate (for variable rate) - shared between scenarios
+                    if (this.scenario2.rateType === 'variable') {
+                        if (this.primeRate === null || this.primeRate === undefined || isNaN(this.primeRate)) {
+                            errors.push({ field: 'primeRate', message: 'Prime rate must be a valid number.', severity: 'error' });
+                        } else if (this.primeRate <= 0) {
+                            errors.push({ field: 'primeRate', message: 'Prime rate must be greater than zero.', severity: 'error' });
+                        } else if (this.primeRate < this.mortgageConfig.ranges.primeRate.min) {
+                            errors.push({ field: 'primeRate', message: `Prime rate must be at least ${this.mortgageConfig.ranges.primeRate.min}%.`, severity: 'error' });
+                        } else if (this.primeRate > this.mortgageConfig.ranges.primeRate.max) {
+                            errors.push({ field: 'primeRate', message: `Prime rate cannot exceed ${this.mortgageConfig.ranges.primeRate.max}%.`, severity: 'error' });
+                        }
+                        
+                        // Validate variable discount
+                        if (this.scenario2.variableDiscount === null || this.scenario2.variableDiscount === undefined || isNaN(this.scenario2.variableDiscount)) {
+                            errors.push({ field: 'variableDiscount', message: 'Variable discount must be a valid number.', severity: 'error' });
+                        } else if (this.scenario2.variableDiscount < this.mortgageConfig.ranges.variableDiscount.min) {
+                            errors.push({ field: 'variableDiscount', message: `Variable discount must be at least ${this.mortgageConfig.ranges.variableDiscount.min}%.`, severity: 'error' });
+                        } else if (this.scenario2.variableDiscount > this.mortgageConfig.ranges.variableDiscount.max) {
+                            errors.push({ field: 'variableDiscount', message: `Variable discount cannot exceed ${this.mortgageConfig.ranges.variableDiscount.max}%.`, severity: 'error' });
+                        } else if (this.scenario2.variableDiscount >= this.primeRate) {
+                            errors.push({ field: 'variableDiscount', message: 'Variable discount cannot be greater than or equal to prime rate.', severity: 'error' });
+                        }
+                        
+                        // Validate effective variable rate
+                        const effectiveVariableRate = this.primeRate - this.scenario2.variableDiscount;
+                        if (effectiveVariableRate <= 0) {
+                            errors.push({ field: 'variableDiscount', message: 'Effective variable rate must be greater than zero.', severity: 'error' });
+                        } else if (effectiveVariableRate > 15) {
+                            errors.push({ field: 'variableDiscount', message: 'Effective variable rate cannot exceed 15%.', severity: 'error' });
+                        }
+                    }
+                    
+                    // Validate amortization period
+                    if (this.scenario2.amortizationYears === null || this.scenario2.amortizationYears === undefined || isNaN(this.scenario2.amortizationYears)) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be a valid number.', severity: 'error' });
+                    } else if (this.scenario2.amortizationYears <= 0) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be greater than zero.', severity: 'error' });
+                    } else if (this.scenario2.amortizationYears < 5) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be at least 5 years.', severity: 'error' });
+                    } else if (this.scenario2.amortizationYears > 30) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period cannot exceed 30 years in Canada.', severity: 'error' });
+                    } else if (!Number.isInteger(this.scenario2.amortizationYears)) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be a whole number of years.', severity: 'warning' });
+                    }
+                    
+                    // Validate interest term
+                    if (this.scenario2.interestTerm === null || this.scenario2.interestTerm === undefined || isNaN(this.scenario2.interestTerm)) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term must be a valid number.', severity: 'error' });
+                    } else if (this.scenario2.interestTerm <= 0) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term must be greater than zero.', severity: 'error' });
+                    } else if (this.scenario2.interestTerm > this.scenario2.amortizationYears) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term cannot exceed amortization period.', severity: 'error' });
+                    } else if (!Number.isInteger(this.scenario2.interestTerm)) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term must be a whole number of years.', severity: 'warning' });
+                    } else if (this.scenario2.interestTerm > 10) {
+                        errors.push({ field: 'interestTerm', message: 'Interest terms longer than 10 years are uncommon in Canada.', severity: 'warning' });
+                    }
+                    
+                    // Validate payment frequency
+                    if (!this.scenario2.paymentFrequency || !this.mortgageConfig.paymentFrequencies[this.scenario2.paymentFrequency]) {
+                        errors.push({ field: 'paymentFrequency', message: 'Please select a valid payment frequency.', severity: 'error' });
+                    }
+                    
+                    return {
+                        isValid: errors.filter(e => e.severity === 'error').length === 0,
+                        errors: errors,
+                        hasWarnings: errors.filter(e => e.severity === 'warning').length > 0,
+                        errorCount: errors.filter(e => e.severity === 'error').length,
+                        warningCount: errors.filter(e => e.severity === 'warning').length
+                    };
+                },
+
+                /**
+                 * Get display rate for current rate type for scenario 2
+                 */
+                displayInterestRate2() {
+                    if (this.scenario2.rateType === 'variable') {
+                        return (this.primeRate - this.scenario2.variableDiscount).toFixed(2);
+                    }
+                    return this.scenario2.interestRate.toFixed(2);
+                },
+
+                // ===== COMPARISON COMPUTED PROPERTIES =====
+
+                /**
+                 * Calculate the difference in monthly payments between scenarios
+                 */
+                paymentDifference() {
+                    if (!this.isCalculationValid || !this.isCalculationValid2) return 0;
+                    return this.monthlyPayment - this.monthlyPayment2;
+                },
+
+                /**
+                 * Calculate the difference in total interest between scenarios
+                 */
+                interestDifference() {
+                    if (!this.isCalculationValid || !this.isCalculationValid2) return 0;
+                    return this.totalInterest - this.totalInterest2;
+                },
+
+                /**
+                 * Calculate the difference in effective interest rates between scenarios
+                 */
+                rateDifference() {
+                    if (!this.isCalculationValid || !this.isCalculationValid2) return 0;
+                    return parseFloat(this.displayInterestRate) - parseFloat(this.displayInterestRate2);
+                },
+
+                /**
+                 * Calculate the total cost difference between scenarios over amortization period
+                 */
+                totalCostDifference() {
+                    if (!this.isCalculationValid || !this.isCalculationValid2) return 0;
+                    const totalCost1 = this.mortgageAmount + this.totalInterest;
+                    const totalCost2 = this.mortgageAmount2 + this.totalInterest2;
+                    return totalCost1 - totalCost2;
                 }
             },
             methods: {
@@ -1817,6 +2623,152 @@
                 },
 
                 /**
+                 * Enhanced input validation with comprehensive range checking
+                 * @returns {Object} Validation result with detailed error information
+                 */
+                getEnhancedInputValidation() {
+                    const errors = [];
+                    
+                    // Validate home price
+                    if (this.homePrice === null || this.homePrice === undefined || isNaN(this.homePrice)) {
+                        errors.push({ field: 'homePrice', message: 'Please enter a valid home price.', severity: 'error' });
+                    } else if (this.homePrice <= 0) {
+                        errors.push({ field: 'homePrice', message: 'Home price must be greater than zero.', severity: 'error' });
+                    } else if (this.homePrice < this.mortgageConfig.ranges.homePrice.min) {
+                        errors.push({ field: 'homePrice', message: `Home price must be at least $${this.mortgageConfig.ranges.homePrice.min.toLocaleString()}.`, severity: 'error' });
+                    } else if (this.homePrice > this.mortgageConfig.ranges.homePrice.max) {
+                        errors.push({ field: 'homePrice', message: `Home price cannot exceed $${this.mortgageConfig.ranges.homePrice.max.toLocaleString()}.`, severity: 'error' });
+                    } else if (this.homePrice % this.mortgageConfig.ranges.homePrice.step !== 0) {
+                        errors.push({ field: 'homePrice', message: `Home price should be in increments of $${this.mortgageConfig.ranges.homePrice.step.toLocaleString()}.`, severity: 'warning' });
+                    }
+                    
+                    // Validate down payment
+                    if (this.downPayment === null || this.downPayment === undefined || isNaN(this.downPayment)) {
+                        errors.push({ field: 'downPayment', message: 'Down payment must be a valid number.', severity: 'error' });
+                    } else if (this.downPayment < 0) {
+                        errors.push({ field: 'downPayment', message: 'Down payment cannot be negative.', severity: 'error' });
+                    } else if (this.downPayment > this.homePrice) {
+                        errors.push({ field: 'downPayment', message: 'Down payment cannot exceed home price.', severity: 'error' });
+                    } else if (!this.isDownPaymentValid) {
+                        errors.push({ field: 'downPayment', message: this.downPaymentErrorMessage, severity: 'error' });
+                    }
+                    
+                    // Validate interest rate (fixed rate)
+                    if (this.rateType === 'fixed') {
+                        if (this.interestRate === null || this.interestRate === undefined || isNaN(this.interestRate)) {
+                            errors.push({ field: 'interestRate', message: 'Interest rate must be a valid number.', severity: 'error' });
+                        } else if (this.interestRate <= 0) {
+                            errors.push({ field: 'interestRate', message: 'Interest rate must be greater than zero.', severity: 'error' });
+                        } else if (this.interestRate < this.mortgageConfig.ranges.interestRate.min) {
+                            errors.push({ field: 'interestRate', message: `Interest rate must be at least ${this.mortgageConfig.ranges.interestRate.min}%.`, severity: 'error' });
+                        } else if (this.interestRate > this.mortgageConfig.ranges.interestRate.max) {
+                            errors.push({ field: 'interestRate', message: `Interest rate cannot exceed ${this.mortgageConfig.ranges.interestRate.max}%.`, severity: 'error' });
+                        } else if (this.interestRate > 10) {
+                            errors.push({ field: 'interestRate', message: 'Interest rate above 10% is unusually high. Please verify this rate.', severity: 'warning' });
+                        }
+                    }
+                    
+                    // Validate prime rate (for variable rate)
+                    if (this.rateType === 'variable') {
+                        if (this.primeRate === null || this.primeRate === undefined || isNaN(this.primeRate)) {
+                            errors.push({ field: 'primeRate', message: 'Prime rate must be a valid number.', severity: 'error' });
+                        } else if (this.primeRate <= 0) {
+                            errors.push({ field: 'primeRate', message: 'Prime rate must be greater than zero.', severity: 'error' });
+                        } else if (this.primeRate < this.mortgageConfig.ranges.primeRate.min) {
+                            errors.push({ field: 'primeRate', message: `Prime rate must be at least ${this.mortgageConfig.ranges.primeRate.min}%.`, severity: 'error' });
+                        } else if (this.primeRate > this.mortgageConfig.ranges.primeRate.max) {
+                            errors.push({ field: 'primeRate', message: `Prime rate cannot exceed ${this.mortgageConfig.ranges.primeRate.max}%.`, severity: 'error' });
+                        }
+                        
+                        // Validate variable discount
+                        if (this.variableDiscount === null || this.variableDiscount === undefined || isNaN(this.variableDiscount)) {
+                            errors.push({ field: 'variableDiscount', message: 'Variable discount must be a valid number.', severity: 'error' });
+                        } else if (this.variableDiscount < this.mortgageConfig.ranges.variableDiscount.min) {
+                            errors.push({ field: 'variableDiscount', message: `Variable discount must be at least ${this.mortgageConfig.ranges.variableDiscount.min}%.`, severity: 'error' });
+                        } else if (this.variableDiscount > this.mortgageConfig.ranges.variableDiscount.max) {
+                            errors.push({ field: 'variableDiscount', message: `Variable discount cannot exceed ${this.mortgageConfig.ranges.variableDiscount.max}%.`, severity: 'error' });
+                        } else if (this.variableDiscount >= this.primeRate) {
+                            errors.push({ field: 'variableDiscount', message: 'Variable discount cannot be greater than or equal to prime rate.', severity: 'error' });
+                        }
+                        
+                        // Validate effective variable rate
+                        const effectiveVariableRate = this.primeRate - this.variableDiscount;
+                        if (effectiveVariableRate <= 0) {
+                            errors.push({ field: 'variableDiscount', message: 'Effective variable rate must be greater than zero.', severity: 'error' });
+                        } else if (effectiveVariableRate > 15) {
+                            errors.push({ field: 'variableDiscount', message: 'Effective variable rate cannot exceed 15%.', severity: 'error' });
+                        }
+                    }
+                    
+                    // Validate amortization period
+                    if (this.amortizationYears === null || this.amortizationYears === undefined || isNaN(this.amortizationYears)) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be a valid number.', severity: 'error' });
+                    } else if (this.amortizationYears <= 0) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be greater than zero.', severity: 'error' });
+                    } else if (this.amortizationYears < 5) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be at least 5 years.', severity: 'error' });
+                    } else if (this.amortizationYears > 30) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period cannot exceed 30 years in Canada.', severity: 'error' });
+                    } else if (!Number.isInteger(this.amortizationYears)) {
+                        errors.push({ field: 'amortizationYears', message: 'Amortization period must be a whole number of years.', severity: 'warning' });
+                    }
+                    
+                    // Validate interest term
+                    if (this.interestTerm === null || this.interestTerm === undefined || isNaN(this.interestTerm)) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term must be a valid number.', severity: 'error' });
+                    } else if (this.interestTerm <= 0) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term must be greater than zero.', severity: 'error' });
+                    } else if (this.interestTerm > this.amortizationYears) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term cannot exceed amortization period.', severity: 'error' });
+                    } else if (!Number.isInteger(this.interestTerm)) {
+                        errors.push({ field: 'interestTerm', message: 'Interest term must be a whole number of years.', severity: 'warning' });
+                    } else if (this.interestTerm > 10) {
+                        errors.push({ field: 'interestTerm', message: 'Interest terms longer than 10 years are uncommon in Canada.', severity: 'warning' });
+                    }
+                    
+                    // Validate payment frequency
+                    if (!this.paymentFrequency || !this.mortgageConfig.paymentFrequencies[this.paymentFrequency]) {
+                        errors.push({ field: 'paymentFrequency', message: 'Please select a valid payment frequency.', severity: 'error' });
+                    }
+                    
+                    return {
+                        isValid: errors.filter(e => e.severity === 'error').length === 0,
+                        errors: errors,
+                        hasWarnings: errors.filter(e => e.severity === 'warning').length > 0,
+                        errorCount: errors.filter(e => e.severity === 'error').length,
+                        warningCount: errors.filter(e => e.severity === 'warning').length
+                    };
+                },
+
+                /**
+                 * Get validation errors for a specific field
+                 * @param {string} fieldName - Name of the field to validate
+                 * @returns {Array} Array of validation errors for the field
+                 */
+                getFieldValidationErrors(fieldName) {
+                    const validation = this.getEnhancedInputValidation();
+                    return validation.errors.filter(error => error.field === fieldName);
+                },
+
+                /**
+                 * Check if a specific field has validation errors
+                 * @param {string} fieldName - Name of the field to check
+                 * @returns {boolean} True if field has errors
+                 */
+                hasFieldErrors(fieldName) {
+                    return this.getFieldValidationErrors(fieldName).filter(e => e.severity === 'error').length > 0;
+                },
+
+                /**
+                 * Check if a specific field has validation warnings
+                 * @param {string} fieldName - Name of the field to check
+                 * @returns {boolean} True if field has warnings
+                 */
+                hasFieldWarnings(fieldName) {
+                    return this.getFieldValidationErrors(fieldName).filter(e => e.severity === 'warning').length > 0;
+                },
+
+                /**
                  * Update home price from slider input
                  * @param {Event} event - Input event from slider
                  */
@@ -1851,6 +2803,36 @@
                 setDownPaymentPercent(percent) {
                     const newAmount = (this.homePrice * percent) / 100;
                     this.downPayment = Math.round(newAmount);
+                },
+
+                // ===== SCENARIO 2 METHODS =====
+
+                /**
+                 * Update down payment from dollar amount input for scenario 2
+                 * @param {Event} event - Input event from dollar input
+                 */
+                updateDownPaymentFromDollar2(event) {
+                    const newAmount = parseFloat(event.target.value) || 0;
+                    this.scenario2.downPayment = Math.max(0, Math.min(newAmount, this.scenario2.homePrice));
+                },
+
+                /**
+                 * Update down payment from percentage input for scenario 2
+                 * @param {Event} event - Input event from percentage input
+                 */
+                updateDownPaymentFromPercent2(event) {
+                    const newPercent = parseFloat(event.target.value) || 0;
+                    const newAmount = (this.scenario2.homePrice * newPercent) / 100;
+                    this.scenario2.downPayment = Math.max(0, Math.min(newAmount, this.scenario2.homePrice));
+                },
+
+                /**
+                 * Set down payment to a specific percentage for scenario 2
+                 * @param {number} percent - Percentage to set (5, 10, 15, 20, 25)
+                 */
+                setDownPaymentPercent2(percent) {
+                    const newAmount = (this.scenario2.homePrice * percent) / 100;
+                    this.scenario2.downPayment = Math.round(newAmount);
                 }
             },
             watch: {

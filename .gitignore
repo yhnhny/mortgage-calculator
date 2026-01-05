@@ -39,3 +39,4 @@ test*.*
 .kiro/steering/structure.md
 .kiro/steering/tech.md
 .vscode/settings.json
+run-property-test.js
