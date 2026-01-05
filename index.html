@@ -135,14 +135,14 @@
             <div class="mb-6 md:mb-8 text-center">
                 <div class="inline-flex items-center bg-white rounded-lg shadow-lg p-1 md:p-2">
                     <button 
-                        @click="comparisonMode = false"
+                        @click="switchToSingleMode"
                         class="px-4 md:px-6 py-2 text-sm font-medium rounded-md transition-colors"
                         :class="!comparisonMode ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
                     >
                         Single Scenario
                     </button>
                     <button 
-                        @click="comparisonMode = true"
+                        @click="switchToComparisonMode"
                         class="px-4 md:px-6 py-2 text-sm font-medium rounded-md transition-colors"
                         :class="comparisonMode ? 'bg-gold text-white shadow-sm' : 'text-gray-700 hover:text-gray-900'"
                     >
@@ -1701,19 +1701,19 @@
                         ranges: {
                             homePrice: { min: 100000, max: 2000000, step: 5000, default: 500000 },
                             downPayment: { min: 0, max: 1000000, step: 1000, default: 25000 },
-                            interestRate: { min: 1.0, max: 15.0, step: 0.01, default: 5.25 },
+                            interestRate: { min: 1.0, max: 15.0, step: 0.01, default: 4.45 },
                             variableDiscount: { min: 0.0, max: 3.0, step: 0.01, default: 0.5 },
-                            primeRate: { min: 1.0, max: 15.0, step: 0.01, default: 6.45 }
+                            primeRate: { min: 1.0, max: 15.0, step: 0.01, default: 4.45 }
                         }
                     },
                     
                     // Prime Rate Configuration
-                    primeRate: 6.45,
+                    primeRate: 4.45,
                     
                     // User Input Properties
                     homePrice: 500000,
                     downPayment: 25000,
-                    interestRate: 5.25,
+                    interestRate: 4.45,
                     rateType: 'fixed', // 'fixed' or 'variable'
                     variableDiscount: 0.5,
                     amortizationYears: 25,
@@ -1721,7 +1721,7 @@
                     paymentFrequency: 'monthly',
                     
                     // Comparison Mode Properties
-                    comparisonMode: false,
+                    comparisonMode: new URLSearchParams(window.location.search).get('mode') === 'comparison',
                     scenario2: {
                         homePrice: 500000,
                         downPayment: 25000,
@@ -2416,6 +2416,36 @@
             },
             methods: {
                 /**
+                 * Switch to single scenario mode
+                 * Simple approach - just update the mode directly
+                 */
+                switchToSingleMode() {
+                    if (this.comparisonMode !== false) {
+                        console.log('Switching to single mode');
+                        this.comparisonMode = false;
+                        
+                        // Remove comparison mode from URL if present
+                        const url = new URL(window.location);
+                        if (url.searchParams.has('mode')) {
+                            url.searchParams.delete('mode');
+                            window.history.replaceState({}, '', url.toString());
+                        }
+                    }
+                },
+
+                /**
+                 * Switch to comparison mode
+                 * Ensures proper reactivity and UI updates
+                 */
+                switchToComparisonMode() {
+                    console.log('Switching to comparison mode - refreshing page');
+                    // Add comparison mode parameter to URL and refresh
+                    const url = new URL(window.location);
+                    url.searchParams.set('mode', 'comparison');
+                    window.location.href = url.toString();
+                },
+
+                /**
                  * Calculate effective annual rate with semi-annual compounding
                  * Formula: re = (1 + r/2)^2 - 1
                  * @param {number} nominalRate - Annual nominal interest rate (as decimal)
@@ -2836,6 +2866,11 @@
                 }
             },
             watch: {
+                // Watch for changes in comparison mode
+                comparisonMode(newValue, oldValue) {
+                    console.log(`Comparison mode changed: ${oldValue} -> ${newValue}`);
+                },
+
                 // Watch for changes in home price and update down payment if needed
                 homePrice(newPrice, oldPrice) {
                     // If down payment percentage stays the same, update dollar amount

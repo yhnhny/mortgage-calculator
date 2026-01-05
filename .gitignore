@@ -40,3 +40,4 @@ test*.*
 .kiro/steering/tech.md
 .vscode/settings.json
 run-property-test.js
+MODE_SWITCHING_BUG_FIX.md
